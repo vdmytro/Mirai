@@ -9,7 +9,7 @@ public class MiraiEditorTarget : TargetRules
 	{
 		Type = TargetType.Editor;
 
-		ExtraModuleNames.AddRange(new string[] { "MiraiGame" });
+		ExtraModuleNames.AddRange(new string[] { "MiraiGame", "MiraiEditor" });
 
 		if (!bBuildAllModules)
 		{

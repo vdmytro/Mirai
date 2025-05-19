@@ -12,6 +12,11 @@
 				"DeveloperSettings",
 				"Engine"
 			]
+		},
+		{
+			"Name": "MiraiEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
 		}
 	],
 	"Plugins": [
