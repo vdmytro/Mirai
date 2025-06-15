@@ -85,6 +85,11 @@ protected:
 	void Input_Crouch(const FInputActionValue& InputActionValue);
 	void Input_AutoRun(const FInputActionValue& InputActionValue);
 
+	// TODO: Handle it by ability
+	void Input_Jump(const FInputActionValue& InputActionValue);
+	void Input_Sprint(const FInputActionValue& InputActionValue);
+	
+
 	TSubclassOf<UMiraiCameraMode> DetermineCameraMode() const;
 	
 	void OnInputConfigActivated(const FLoadedMappableConfigPair& ConfigPair);

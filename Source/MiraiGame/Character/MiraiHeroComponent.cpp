@@ -22,6 +22,7 @@
 #include "Camera/MiraiCameraMode.h"
 #include "UserSettings/EnhancedInputUserSettings.h"
 #include "InputMappingContext.h"
+#include "MiraiCharacterMovementComponent.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MiraiHeroComponent)
 
@@ -292,6 +293,9 @@ void UMiraiHeroComponent::InitializePlayerInput(UInputComponent* PlayerInputComp
 					MiraiIC->BindNativeAction(InputConfig, MiraiGameplayTags::InputTag_Look_Stick, ETriggerEvent::Triggered, this, &ThisClass::Input_LookStick, /*bLogIfNotFound=*/ true);
 					MiraiIC->BindNativeAction(InputConfig, MiraiGameplayTags::InputTag_Crouch, ETriggerEvent::Triggered, this, &ThisClass::Input_Crouch, /*bLogIfNotFound=*/ true);
 					MiraiIC->BindNativeAction(InputConfig, MiraiGameplayTags::InputTag_AutoRun, ETriggerEvent::Triggered, this, &ThisClass::Input_AutoRun, /*bLogIfNotFound=*/ true);
+					// TODO: Change to ability
+					MiraiIC->BindNativeAction(InputConfig, MiraiGameplayTags::InputTag_Jump, ETriggerEvent::Triggered, this, &ThisClass::Input_Jump, /*bLogIfNotFound=*/ true);
+					MiraiIC->BindNativeAction(InputConfig, MiraiGameplayTags::InputTag_Sprint, ETriggerEvent::Ongoing, this, &ThisClass::Input_Sprint, /*bLogIfNotFound=*/ true);
 				}
 			}
 		}
@@ -458,6 +462,37 @@ void UMiraiHeroComponent::Input_Crouch(const FInputActionValue& InputActionValue
 	if (AMiraiCharacter* Character = GetPawn<AMiraiCharacter>())
 	{
 		Character->ToggleCrouch();
+	}
+}
+
+void UMiraiHeroComponent::Input_Jump(const FInputActionValue& InputActionValue)
+{
+	if (AMiraiCharacter* Character = GetPawn<AMiraiCharacter>())
+	{
+		Character->Jump();
+	}
+}
+
+void UMiraiHeroComponent::Input_Sprint(const FInputActionValue& InputActionValue)
+{
+	if (AMiraiCharacter* Character = GetPawn<AMiraiCharacter>())
+	{
+		const bool Value = InputActionValue.Get<bool>();
+		if (Value) {
+			UMiraiCharacterMovementComponent* MC = Cast<UMiraiCharacterMovementComponent>(Character->GetMovementComponent());
+			if (MC)
+			{
+				MC->MaxWalkSpeed = MC->MaxWalkSpeed + 1000;
+			}
+		}
+		else
+		{
+			UMiraiCharacterMovementComponent* MC = Cast<UMiraiCharacterMovementComponent>(Character->GetMovementComponent());
+			if (MC)
+			{
+				MC->MaxWalkSpeed = MC->MaxWalkSpeed - 1000;
+			}
+		}
 	}
 }
 

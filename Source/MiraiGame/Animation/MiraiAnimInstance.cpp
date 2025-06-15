@@ -42,7 +42,8 @@ void UMiraiAnimInstance::NativeInitializeAnimation()
 
 	if (AActor* OwningActor = GetOwningActor())
 	{
-		if (UAbilitySystemComponent* ASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(OwningActor))
+		UAbilitySystemComponent* ASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(OwningActor);
+		if (ASC)
 		{
 			InitializeWithAbilitySystem(ASC);
 		}
