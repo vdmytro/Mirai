@@ -317,6 +317,7 @@ void UMiraiHeroComponent::AddAdditionalInputConfig(const UMiraiInputConfig* Inpu
 	const APawn* Pawn = GetPawn<APawn>();
 	if (!Pawn)
 	{
+		UE_LOG(LogMirai, Warning, TEXT("%s: Can't found Pawn Class."), ANSI_TO_TCHAR(__FUNCTION__));
 		return;
 	}
 	
