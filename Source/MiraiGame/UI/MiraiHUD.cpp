@@ -2,7 +2,6 @@
 
 #include "MiraiHUD.h"
 
-
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
 #include "Async/TaskGraphInterfaces.h"
@@ -14,6 +13,8 @@
 class AActor;
 class UWorld;
 
+//////////////////////////////////////////////////////////////////////
+// AMiraiHUD
 
 AMiraiHUD::AMiraiHUD(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)

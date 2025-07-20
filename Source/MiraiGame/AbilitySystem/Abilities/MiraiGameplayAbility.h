@@ -21,7 +21,7 @@ class UAnimMontage;
 class UMiraiAbilityCost;
 class UMiraiAbilitySystemComponent;
 class UMiraiCameraMode;
-//class UMiraiHeroComponent;
+class UMiraiHeroComponent;
 class UObject;
 struct FFrame;
 struct FGameplayAbilityActorInfo;
@@ -113,8 +113,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Mirai|Ability")
 	AMiraiCharacter* GetMiraiCharacterFromActorInfo() const;
 
-	//UFUNCTION(BlueprintCallable, Category = "Mirai|Ability")
-	//UMiraiHeroComponent* GetHeroComponentFromActorInfo() const;
+	UFUNCTION(BlueprintCallable, Category = "Mirai|Ability")
+	UMiraiHeroComponent* GetHeroComponentFromActorInfo() const;
 
 	EMiraiAbilityActivationPolicy GetActivationPolicy() const { return ActivationPolicy; }
 	EMiraiAbilityActivationGroup GetActivationGroup() const { return ActivationGroup; }

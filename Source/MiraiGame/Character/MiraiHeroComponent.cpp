@@ -293,9 +293,9 @@ void UMiraiHeroComponent::InitializePlayerInput(UInputComponent* PlayerInputComp
 					MiraiIC->BindNativeAction(InputConfig, MiraiGameplayTags::InputTag_Look_Stick, ETriggerEvent::Triggered, this, &ThisClass::Input_LookStick, /*bLogIfNotFound=*/ true);
 					MiraiIC->BindNativeAction(InputConfig, MiraiGameplayTags::InputTag_Crouch, ETriggerEvent::Triggered, this, &ThisClass::Input_Crouch, /*bLogIfNotFound=*/ true);
 					MiraiIC->BindNativeAction(InputConfig, MiraiGameplayTags::InputTag_AutoRun, ETriggerEvent::Triggered, this, &ThisClass::Input_AutoRun, /*bLogIfNotFound=*/ true);
-					// TODO: Change to ability
-					MiraiIC->BindNativeAction(InputConfig, MiraiGameplayTags::InputTag_Jump, ETriggerEvent::Triggered, this, &ThisClass::Input_Jump, /*bLogIfNotFound=*/ true);
-					MiraiIC->BindNativeAction(InputConfig, MiraiGameplayTags::InputTag_Sprint, ETriggerEvent::Ongoing, this, &ThisClass::Input_Sprint, /*bLogIfNotFound=*/ true);
+					// Uncomment only for test, this actions added up by ability
+					//MiraiIC->BindNativeAction(InputConfig, MiraiGameplayTags::InputTag_Jump, ETriggerEvent::Triggered, this, &ThisClass::Input_Jump, /*bLogIfNotFound=*/ true);
+					//MiraiIC->BindNativeAction(InputConfig, MiraiGameplayTags::InputTag_Sprint, ETriggerEvent::Ongoing, this, &ThisClass::Input_Sprint, /*bLogIfNotFound=*/ true);
 				}
 			}
 		}
