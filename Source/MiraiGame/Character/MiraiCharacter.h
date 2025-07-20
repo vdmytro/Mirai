@@ -104,10 +104,10 @@ public:
 	virtual bool UpdateSharedReplication();
 	void ToggleCrouch();
 
-	UFUNCTION(BlueprintCallable, Category = "Mira i|Character")
+	UFUNCTION(BlueprintCallable, Category = "Mirai|Character")
 	AMiraiPlayerController* GetMiraiPlayerController() const;
 
-	UFUNCTION(BlueprintCallable, Category = "Mira i|Character")
+	UFUNCTION(BlueprintCallable, Category = "Mirai|Character")
 	AMiraiPlayerState* GetMiraiPlayerState() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Mirai|Character")

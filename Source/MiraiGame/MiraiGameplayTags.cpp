@@ -23,8 +23,6 @@ namespace MiraiGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_Look_Stick, "InputTag.Look.Stick", "Look (stick) input.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_Crouch, "InputTag.Crouch", "Crouch input.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_AutoRun, "InputTag.AutoRun", "Auto-run input.");
-	UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_Jump, "InputTag.Jump", "Jump input.");
-	UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_Sprint, "InputTag.Sprint", "Sprint input.");
 
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_Weapon_Reload, "InputTag.Weapon.Reload", "Weapon Reload input.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_Weapon_Fire, "InputTag.Weapon.Fire", "Weapon Fire input.");
@@ -32,6 +30,8 @@ namespace MiraiGameplayTags
 
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_Ability_Heal, "InputTag.Ability.Heal", "Ability Heal input.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_Ability_Dash, "InputTag.Ability.Dash", "Ability Dash input.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_Ability_Sprint, "InputTag.Ability.Sprint", "Sprint input.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_Ability_Jump, "InputTag.Ability.Jump", "Jump input.");
 
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(InitState_Spawned, "InitState.Spawned", "1: Actor/component has initially spawned and can be extended");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(InitState_DataAvailable, "InitState.DataAvailable", "2: All required data has been loaded/replicated and is ready for initialization");

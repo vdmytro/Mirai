@@ -24,20 +24,21 @@ class AMiraiHUD : public AHUD
 {
 	GENERATED_BODY()
 
-// AMiraiHUD
 public:
 	AMiraiHUD(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-// UObject
 protected:
-	virtual void PreInitializeComponents() override;
 
-// AActor
-protected:
+	//~UObject interface
+	virtual void PreInitializeComponents() override;
+	//~End of UObject interface
+
+	//~AActor interface
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-	
-// AHUD
-protected:
+	//~End of AActor interface
+
+	//~AHUD interface
 	virtual void GetDebugActorList(TArray<AActor*>& InOutList) override;
+	//~End of AHUD interface
 };

@@ -8,7 +8,7 @@
 #include "Character/MiraiCharacter.h"
 #include "MiraiGameplayTags.h"
 #include "MiraiAbilityCost.h"
-//#include "Character/MiraiHeroComponent.h"
+#include "Character/MiraiHeroComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemGlobals.h"
 #include "MiraiAbilitySimpleFailureMessage.h"
@@ -94,10 +94,10 @@ AMiraiCharacter* UMiraiGameplayAbility::GetMiraiCharacterFromActorInfo() const
 	return (CurrentActorInfo ? Cast<AMiraiCharacter>(CurrentActorInfo->AvatarActor.Get()) : nullptr);
 }
 
-//UMiraiHeroComponent* UMiraiGameplayAbility::GetHeroComponentFromActorInfo() const
-//{
-//	return (CurrentActorInfo ? UMiraiHeroComponent::FindHeroComponent(CurrentActorInfo->AvatarActor.Get()) : nullptr);
-//}
+UMiraiHeroComponent* UMiraiGameplayAbility::GetHeroComponentFromActorInfo() const
+{
+	return (CurrentActorInfo ? UMiraiHeroComponent::FindHeroComponent(CurrentActorInfo->AvatarActor.Get()) : nullptr);
+}
 
 void UMiraiGameplayAbility::NativeOnAbilityFailedToActivate(const FGameplayTagContainer& FailedReason) const
 {
@@ -522,11 +522,11 @@ void UMiraiGameplayAbility::SetCameraMode(TSubclassOf<UMiraiCameraMode> CameraMo
 {
 	ENSURE_ABILITY_IS_INSTANTIATED_OR_RETURN(SetCameraMode, );
 
-	//if (UMiraiHeroComponent* HeroComponent = GetHeroComponentFromActorInfo())
-	//{
-	//	HeroComponent->SetAbilityCameraMode(CameraMode, CurrentSpecHandle);
-	//	ActiveCameraMode = CameraMode;
-	//}
+	if (UMiraiHeroComponent* HeroComponent = GetHeroComponentFromActorInfo())
+	{
+		HeroComponent->SetAbilityCameraMode(CameraMode, CurrentSpecHandle);
+		ActiveCameraMode = CameraMode;
+	}
 }
 
 void UMiraiGameplayAbility::ClearCameraMode()
@@ -535,10 +535,10 @@ void UMiraiGameplayAbility::ClearCameraMode()
 
 	if (ActiveCameraMode)
 	{
-		//if (UMiraiHeroComponent* HeroComponent = GetHeroComponentFromActorInfo())
-		//{
-		//	HeroComponent->ClearAbilityCameraMode(CurrentSpecHandle);
-		//}
+		if (UMiraiHeroComponent* HeroComponent = GetHeroComponentFromActorInfo())
+		{
+			HeroComponent->ClearAbilityCameraMode(CurrentSpecHandle);
+		}
 
 		ActiveCameraMode = nullptr;
 	}
