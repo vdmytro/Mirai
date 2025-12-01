@@ -60,7 +60,15 @@ int32 UCommonGameInstance::AddLocalPlayer(ULocalPlayer* NewPlayer, FPlatformUser
 			PrimaryPlayer = NewPlayer;
 		}
 		
-		//GetSubsystem<UGameUIManagerSubsystem>()->NotifyPlayerAdded(Cast<UCommonLocalPlayer>(NewPlayer));
+		UGameUIManagerSubsystem* GameUIManagerSubsystem = GetSubsystem<UGameUIManagerSubsystem>();
+		if (GameUIManagerSubsystem)
+		{
+			GameUIManagerSubsystem->NotifyPlayerAdded(Cast<UCommonLocalPlayer>(NewPlayer));
+		} 
+		else
+		{
+			UE_LOG(LogCommonGame, Warning, TEXT("AddLocalPlayer: Not found GameUIManagerSubsystem"));
+		}
 	}
 	
 	return ReturnVal;
@@ -74,7 +82,16 @@ bool UCommonGameInstance::RemoveLocalPlayer(ULocalPlayer* ExistingPlayer)
 		PrimaryPlayer.Reset();
 		UE_LOG(LogCommonGame, Log, TEXT("RemoveLocalPlayer: Unsetting Primary Player from %s"), *ExistingPlayer->GetName());
 	}
-	//GetSubsystem<UGameUIManagerSubsystem>()->NotifyPlayerDestroyed(Cast<UCommonLocalPlayer>(ExistingPlayer));
+
+	UGameUIManagerSubsystem* GameUIManagerSubsystem = GetSubsystem<UGameUIManagerSubsystem>();
+	if (GameUIManagerSubsystem)
+	{
+		GameUIManagerSubsystem->NotifyPlayerDestroyed(Cast<UCommonLocalPlayer>(ExistingPlayer));
+	}
+	else
+	{
+		UE_LOG(LogCommonGame, Warning, TEXT("RemoveLocalPlayer: Not found GameUIManagerSubsystem"));
+	}
 
 	return Super::RemoveLocalPlayer(ExistingPlayer);
 }
