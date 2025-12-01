@@ -109,6 +109,7 @@ void UMiraiFrontendStateComponent::FlowStep_WaitForUserInitialization(FControlFl
 
 void UMiraiFrontendStateComponent::FlowStep_TryShowPressStartScreen(FControlFlowNodeRef SubFlow)
 {
+#if 0
 	const UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(this);
 	UCommonUserSubsystem* UserSubsystem = GameInstance->GetSubsystem<UCommonUserSubsystem>();
 
@@ -157,6 +158,9 @@ void UMiraiFrontendStateComponent::FlowStep_TryShowPressStartScreen(FControlFlow
 			}
 		});
 	}
+#else
+	SubFlow->ContinueFlow();
+#endif
 }
 
 void UMiraiFrontendStateComponent::OnUserInitialized(const UCommonUserInfo* UserInfo, bool bSuccess, FText Error, ECommonUserPrivilege RequestedPrivilege, ECommonUserOnlineContext OnlineContext)
@@ -221,7 +225,9 @@ void UMiraiFrontendStateComponent::FlowStep_TryJoinRequestedSession(FControlFlow
 
 void UMiraiFrontendStateComponent::FlowStep_TryShowMainScreen(FControlFlowNodeRef SubFlow)
 {
-	if (UPrimaryGameLayout* RootLayout = UPrimaryGameLayout::GetPrimaryGameLayoutForPrimaryPlayer(this))
+	UPrimaryGameLayout* RootLayout = UPrimaryGameLayout::GetPrimaryGameLayoutForPrimaryPlayer(this);
+
+	if (RootLayout)
 	{
 		constexpr bool bSuspendInputUntilComplete = true;
 		RootLayout->PushWidgetToLayerStackAsync<UCommonActivatableWidget>(FrontendTags::TAG_UI_LAYER_MENU, bSuspendInputUntilComplete, MainScreenClass,
