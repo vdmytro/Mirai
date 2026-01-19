@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// Copyright(c) 2025, dvolkov.All rights reserved.
 
 #include "MiraiDeveloperSettings.h"
 #include "Misc/App.h"

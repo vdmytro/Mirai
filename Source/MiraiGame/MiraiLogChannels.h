@@ -1,4 +1,4 @@
-// Copyright CtrlCtrlV, Inc. All Rights Reserved.
+// Copyright (c) 2025, dvolkov. All rights reserved.
 
 #pragma once
 

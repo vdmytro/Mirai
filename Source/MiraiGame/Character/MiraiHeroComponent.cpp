@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// Copyright(c) 2025, dvolkov.All rights reserved.
 
 #include "MiraiHeroComponent.h"
 #include "Components/GameFrameworkComponentDelegates.h"
@@ -294,8 +294,8 @@ void UMiraiHeroComponent::InitializePlayerInput(UInputComponent* PlayerInputComp
 					MiraiIC->BindNativeAction(InputConfig, MiraiGameplayTags::InputTag_Crouch, ETriggerEvent::Triggered, this, &ThisClass::Input_Crouch, /*bLogIfNotFound=*/ true);
 					MiraiIC->BindNativeAction(InputConfig, MiraiGameplayTags::InputTag_AutoRun, ETriggerEvent::Triggered, this, &ThisClass::Input_AutoRun, /*bLogIfNotFound=*/ true);
 					// Uncomment only for test, this actions added up by ability
-					//MiraiIC->BindNativeAction(InputConfig, MiraiGameplayTags::InputTag_Jump, ETriggerEvent::Triggered, this, &ThisClass::Input_Jump, /*bLogIfNotFound=*/ true);
-					//MiraiIC->BindNativeAction(InputConfig, MiraiGameplayTags::InputTag_Sprint, ETriggerEvent::Ongoing, this, &ThisClass::Input_Sprint, /*bLogIfNotFound=*/ true);
+					MiraiIC->BindNativeAction(InputConfig, MiraiGameplayTags::InputTag_Ability_Jump, ETriggerEvent::Triggered, this, &ThisClass::Input_Jump, /*bLogIfNotFound=*/ true);
+					MiraiIC->BindNativeAction(InputConfig, MiraiGameplayTags::InputTag_Ability_Sprint, ETriggerEvent::Ongoing, this, &ThisClass::Input_Sprint, /*bLogIfNotFound=*/ true);
 				}
 			}
 		}
@@ -335,7 +335,7 @@ void UMiraiHeroComponent::AddAdditionalInputConfig(const UMiraiInputConfig* Inpu
 		UMiraiInputComponent* MiraiIC = Pawn->FindComponentByClass<UMiraiInputComponent>();
 		if (ensureMsgf(MiraiIC, TEXT("Unexpected Input Component class! The Gameplay Abilities will not be bound to their inputs. Change the input component to UMiraiInputComponent or a subclass of it.")))
 		{
-			MiraiIC->BindAbilityActions(InputConfig, this, &ThisClass::Input_AbilityInputTagPressed, &ThisClass::Input_AbilityInputTagReleased, /*out*/ BindHandles);
+			//MiraiIC->BindAbilityActions(InputConfig, this, &ThisClass::Input_AbilityInputTagPressed, &ThisClass::Input_AbilityInputTagReleased, /*out*/ BindHandles);
 		}
 	}
 }

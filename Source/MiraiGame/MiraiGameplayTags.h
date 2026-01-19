@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// Copyright (c) 2025, dvolkov. All rights reserved.
 
 #pragma once
 
@@ -51,6 +51,7 @@ namespace MiraiGameplayTags
 
 	MIRAIGAME_API	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Status_Crouching);
 	MIRAIGAME_API	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Status_AutoRunning);
+	MIRAIGAME_API	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Status_Sprinting);
 	MIRAIGAME_API	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Status_Death);
 	MIRAIGAME_API	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Status_Death_Dying);
 	MIRAIGAME_API	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Status_Death_Dead);

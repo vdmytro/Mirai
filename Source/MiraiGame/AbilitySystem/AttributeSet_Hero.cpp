@@ -1,3 +1,4 @@
+// Copyright(c) 2025, dvolkov.All rights reserved.
 
 #include "AbilitySystem/AttributeSet_Hero.h"
 

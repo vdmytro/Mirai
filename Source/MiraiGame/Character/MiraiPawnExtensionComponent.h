@@ -1,3 +1,5 @@
+// Copyright(c) 2025, dvolkov.All rights reserved.
+
 #pragma once
 
 #include "Components/GameFrameworkInitStateInterface.h"

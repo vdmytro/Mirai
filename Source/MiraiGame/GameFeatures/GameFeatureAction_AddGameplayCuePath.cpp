@@ -1,4 +1,5 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// Copyright(c) 2025, dvolkov.All rights reserved.
+
 #include "GameFeatureAction_AddGameplayCuePath.h"
 
 #if WITH_EDITOR
