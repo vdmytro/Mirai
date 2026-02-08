@@ -16,10 +16,17 @@ class MIRAIGAME_API UMiraiInteractionDefinition : public UMiraiLootDefinition
 	
 public:
 
+	//SkeletalMesh
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Interaction|Visual")
+    TSoftObjectPtr<USkeletalMesh> SkeletalMesh;
+
+	//Interaction type
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Interaction")
+	EInteractionType InteractionType;
+
 	virtual FPrimaryAssetId GetPrimaryAssetId() const override
 	{
 		return FPrimaryAssetId("InteractionLoot", GetFName());
 	}
-	
 	
 };

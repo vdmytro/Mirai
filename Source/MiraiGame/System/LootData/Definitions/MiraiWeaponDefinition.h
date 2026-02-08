@@ -101,7 +101,7 @@ public:
 
     /* ================== Stats ================== */
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Stats")
     FDataTableRowHandle BaseStats;
 
     /* ================== Animations ================== */
