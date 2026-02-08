@@ -95,3 +95,17 @@ enum class EAmmoType : uint8
     MWA      UMETA(DisplayName = "Mounted Weapons Ammo"), //(mounted weapons)
     OTH     UMETA(DisplayName = "Other"), //(other)
 };
+
+/*
+ * ============================
+ * Interaction
+ * ============================
+ */
+
+UENUM(BlueprintType)
+enum class EInteractionType : uint8
+{
+    None        UMETA(DisplayName = "None"), //(for undefined or broken values)
+    Quest       UMETA(DisplayName = "Quest"),
+    Trash       UMETA(DisplayName = "Trash"),
+};

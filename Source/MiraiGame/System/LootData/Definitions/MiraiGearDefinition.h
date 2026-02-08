@@ -4,7 +4,24 @@
 
 #include "CoreMinimal.h"
 #include "System/LootData/Definitions/MiraiLootDefinition.h"
+
 #include "MiraiGearDefinition.generated.h"
+
+/* ================================
+ * Audio
+ * ================================ */
+
+USTRUCT(BlueprintType)
+struct FGearSounds
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+    TSoftObjectPtr<USoundBase> Equip;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+    TSoftObjectPtr<USoundBase> Unequip;
+};
 
 /**
  * 
@@ -16,10 +33,22 @@ class MIRAIGAME_API UMiraiGearDefinition : public UMiraiLootDefinition
 	
 public:
 
+	//SkeletalMesh
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gear|Visual")
+    TSoftObjectPtr<USkeletalMesh> SkeletalMesh;
+
+	//InventoryData
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gear|Stats")
+    FDataTableRowHandle BaseStats;
+
+	/* ================== Sounds ================== */
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gear|Audio")
+    FGearSounds Sounds;
+
 	virtual FPrimaryAssetId GetPrimaryAssetId() const override
 	{
 		return FPrimaryAssetId("GearLoot", GetFName());
 	}
-	
 	
 };
