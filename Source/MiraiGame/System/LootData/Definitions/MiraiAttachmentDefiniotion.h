@@ -25,11 +25,11 @@ public:
 
     //List of compatible attachments this attachment can be attached to
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attachment|Compatibility")
-    TArray<TSoftObjectPtr<UMiraiAttachmentDefiniotion>> CompatibleParents;
+    TSet<TSoftObjectPtr<UMiraiAttachmentDefiniotion>> CompatibleParents;
 
     //List of sockets where this attachment can be attached
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attachment|Sockets")
-    TArray<FName> CompatibleSockets;
+    TSet<FName> CompatibleSockets;
 	
 
     virtual FPrimaryAssetId GetPrimaryAssetId() const override
