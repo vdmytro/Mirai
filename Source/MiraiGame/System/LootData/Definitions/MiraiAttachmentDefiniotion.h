@@ -17,7 +17,7 @@ class MIRAIGAME_API UMiraiAttachmentDefiniotion : public UMiraiLootDefinition
 public:
     //Skeletal mesh of the attachment
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attachment|Visual")
-    TSoftObjectPtr<USkeletalMesh> SkeletalMesh;
+    TObjectPtr<USkeletalMesh> SkeletalMesh;
 
     //Attachment type (Base / Functional / Additional )
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attachment")
@@ -30,6 +30,10 @@ public:
     //List of sockets where this attachment can be attached
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attachment|Sockets")
     TSet<FName> CompatibleSockets;
+
+    //List of sockets of this attachment
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attachment|Sockets")
+    TSet<FName> Sockets;
 	
 
     virtual FPrimaryAssetId GetPrimaryAssetId() const override

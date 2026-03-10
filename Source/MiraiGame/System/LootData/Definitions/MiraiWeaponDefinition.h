@@ -10,6 +10,18 @@ class UMiraiAttachmentDefiniotion;
 class UMiraiAmmoDefinition;
 class UNiagaraSystem;
 
+USTRUCT(BlueprintType)
+struct FWeaponAttachmentSlot
+{
+    GENERATED_BODY()
+
+    UPROPERTY()
+    FName Socket;
+
+    UPROPERTY()
+    TSoftObjectPtr<UMiraiAttachmentDefiniotion> Attachment;
+};
+
 /* ================================
  * Animation Set
  * ================================ */

@@ -18,7 +18,7 @@ public:
 
 	//SkeletalMesh
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Interaction|Visual")
-    TSoftObjectPtr<USkeletalMesh> SkeletalMesh;
+    TObjectPtr<USkeletalMesh> SkeletalMesh;
 
 	//Interaction type
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Interaction")

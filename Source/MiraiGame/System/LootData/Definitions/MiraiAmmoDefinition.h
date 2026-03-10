@@ -50,19 +50,19 @@ public:
 
 	//SkeletalMesh
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ammo|Visual")
-    TSoftObjectPtr<USkeletalMesh> SkeletalMesh;
+    TObjectPtr<USkeletalMesh> SkeletalMesh;
 
 	//Bullet StaticMesh
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ammo|Visual")
-    TSoftObjectPtr<UStaticMesh> BulletMesh;
+    TObjectPtr<UStaticMesh> BulletMesh;
 
 	//Sleeve StaticMesh
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ammo|Visual")
-    TSoftObjectPtr<UStaticMesh> SleeveMesh;
+    TObjectPtr<UStaticMesh> SleeveMesh;
 
 	//Cartridge StaticMesh
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ammo|Visual")
-	TSoftObjectPtr<UStaticMesh> CartridgeMesh;
+	TObjectPtr<UStaticMesh> CartridgeMesh;
 
 	//AmmoType
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ammo")

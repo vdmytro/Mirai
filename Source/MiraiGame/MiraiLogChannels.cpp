@@ -12,6 +12,7 @@ DEFINE_LOG_CATEGORY(LogMiraiTeams);
 DEFINE_LOG_CATEGORY(LogMiraiAnimation);
 DEFINE_LOG_CATEGORY(LogMiraiCharacter);
 DEFINE_LOG_CATEGORY(LogMiraiComponents);
+DEFINE_LOG_CATEGORY(LogMiraiWeapon);
 
 FString GetClientServerContextString(UObject* ContextObject)
 {
