@@ -9,8 +9,6 @@
 
 #include "GameSettingPanel.generated.h"
 
-struct FCompiledToken;
-
 class UGameSetting;
 class UGameSettingDetailView;
 class UGameSettingListView;

@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "{87A21DA7-4F8A-6179-1B81-E59554C78724}",
+	"EngineAssociation": "5.7",
 	"Category": "",
 	"Description": "",
 	"Modules": [
@@ -30,7 +30,7 @@
 		},
 		{
 			"Name": "CommonGame",
-			"Enabled": false
+			"Enabled": true
 		},
 		{
 			"Name": "ModularGameplay",

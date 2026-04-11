@@ -7,6 +7,26 @@
 
 #include "MiraiWeapon.generated.h"
 
+class UMiraiWeaponDefinition;
+class UMiraiAttachmentDefiniotion;
+
+USTRUCT(BlueprintType)
+struct FAttachmentSlot
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName SocketName; //Socket name that current node attached to
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSoftObjectPtr<UMiraiAttachmentDefiniotion> DataAsset = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int Parentindex = -1;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	TObjectPtr<USkeletalMeshComponent> SkeletalMeshComponent = nullptr;
+};
 
 UCLASS()
 class MIRAIGAME_API AMiraiWeapon : public AMiraiLoot
@@ -15,62 +35,26 @@ class MIRAIGAME_API AMiraiWeapon : public AMiraiLoot
 	
 public:	
 	AMiraiWeapon();
+	virtual void Tick(float DeltaTime) override;
+
+	UFUNCTION(CallInEditor)
+	virtual void RebuildMeshes();
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
 	virtual void BeginPlay() override;
 
-public:	
-	virtual void Tick(float DeltaTime) override;
+	//Properties
+private:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", Meta = (AllowPrivateAccess = "true"))
+	TSoftObjectPtr<UMiraiWeaponDefinition> DataAsset;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Data", Meta = (AllowPrivateAccess = "true"))
+	TArray<FAttachmentSlot> AttachmentDataList;
 
 public:
+	virtual void OnConstruction(const FTransform& Transform) override;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components|Attachments", Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<USkeletalMeshComponent> BodySkeletalMesh;
-
-	// Body slots
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components|Attachments", Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<USkeletalMeshComponent> RearSightSkeletalMesh;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components|Attachments", Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<USkeletalMeshComponent> HandguardSkeletalMesh;
-
-	// Handguard slots
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components|Attachments", Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<USkeletalMeshComponent> MuzzleSkeletalMesh;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components|Attachments", Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<USkeletalMeshComponent> FrontSightSkeletalMesh;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components|Attachments", Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<USkeletalMeshComponent> AttachmentDownSkeletalMesh;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components|Attachments", Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<USkeletalMeshComponent> AttachmentUpSkeletalMesh;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components|Attachments", Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<USkeletalMeshComponent> AttachmentLeftSkeletalMesh;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components|Attachments", Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<USkeletalMeshComponent> AttachmentRightSkeletalMesh;
-
-	// End Handguard slots
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components|Attachments", Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<USkeletalMeshComponent> StockSkeletalMesh;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components|Attachments", Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<USkeletalMeshComponent> MagazineSkeletalMesh;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components|Attachments", Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<USkeletalMeshComponent> GripSkeletalMesh;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components|Attachments", Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<USkeletalMeshComponent> ScopeSkeletalMesh;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components|Attachments", Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<USkeletalMeshComponent> TriggerSkeletalMesh;
-
-	// End Body slots
 };

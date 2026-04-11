@@ -5,7 +5,6 @@
 #include "CommonUIExtensions.h"
 #include "NativeGameplayTags.h"
 #include "Settings/CustomSettings/MiraiSettingKeyboardInput.h"
-#include "UI/Foundation/MiraiButtonBase.h"
 #include "Widgets/Misc/GameSettingPressAnyKey.h"
 #include "Widgets/Misc/KeyAlreadyBoundWarning.h"
 
@@ -27,11 +26,6 @@ void UMiraiSettingsListEntrySetting_KeyboardInput::SetSetting(UGameSetting* InSe
 void UMiraiSettingsListEntrySetting_KeyboardInput::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
-	
-	Button_PrimaryKey->OnClicked().AddUObject(this, &ThisClass::HandlePrimaryKeyClicked);
-	Button_SecondaryKey->OnClicked().AddUObject(this, &ThisClass::HandleSecondaryKeyClicked);
-	Button_Clear->OnClicked().AddUObject(this, &ThisClass::HandleClearClicked);
-	Button_ResetToDefault->OnClicked().AddUObject(this, &ThisClass::HandleResetToDefaultClicked);	
 }
 
 void UMiraiSettingsListEntrySetting_KeyboardInput::HandlePrimaryKeyClicked()
@@ -143,19 +137,17 @@ void UMiraiSettingsListEntrySetting_KeyboardInput::Refresh()
 {
 	if (ensure(KeyboardInputSetting))
 	{
-		Button_PrimaryKey->SetButtonText(KeyboardInputSetting->GetKeyTextFromSlot(EPlayerMappableKeySlot::First));
-		Button_SecondaryKey->SetButtonText(KeyboardInputSetting->GetKeyTextFromSlot(EPlayerMappableKeySlot::Second));
 		
 		// Only display the reset to default button if a mapping is customized
-		if (ensure(Button_ResetToDefault))
+		if (0)
 		{
 			if (KeyboardInputSetting->IsMappingCustomized())
 			{
-				Button_ResetToDefault->SetVisibility(ESlateVisibility::Visible);
+			
 			}
 			else
 			{
-				Button_ResetToDefault->SetVisibility(ESlateVisibility::Hidden);
+				
 			}
 		}		
 	}

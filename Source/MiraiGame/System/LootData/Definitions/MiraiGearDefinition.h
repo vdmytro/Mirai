@@ -35,7 +35,7 @@ public:
 
 	//SkeletalMesh
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gear|Visual")
-    TSoftObjectPtr<USkeletalMesh> SkeletalMesh;
+    TObjectPtr<USkeletalMesh> SkeletalMesh;
 
 	//InventoryData
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gear|Stats")

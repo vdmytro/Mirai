@@ -10,6 +10,18 @@ class UMiraiAttachmentDefiniotion;
 class UMiraiAmmoDefinition;
 class UNiagaraSystem;
 
+USTRUCT(BlueprintType)
+struct FWeaponAttachmentSlot
+{
+    GENERATED_BODY()
+
+    UPROPERTY()
+    FName Socket;
+
+    UPROPERTY()
+    TSoftObjectPtr<UMiraiAttachmentDefiniotion> Attachment;
+};
+
 /* ================================
  * Animation Set
  * ================================ */
@@ -81,11 +93,11 @@ public:
 
     // Default Base-Type Attachments (spawned by default)
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Attachments")
-    TArray<TSoftObjectPtr<UMiraiAttachmentDefiniotion>> DefaultBaseAttachments;
+    TSet<TSoftObjectPtr<UMiraiAttachmentDefiniotion>> DefaultBaseAttachments;
 
     // All compatible Base-Type Attachments
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Attachments")
-    TArray<TSoftObjectPtr<UMiraiAttachmentDefiniotion>> CompatibleAttachments;
+    TSet<TSoftObjectPtr<UMiraiAttachmentDefiniotion>> CompatibleAttachments;
 
     /* ================== Weapon Params ================== */
 
@@ -97,7 +109,7 @@ public:
 
     // Sub-types of ammo
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Ammo")
-    TArray<TSoftObjectPtr<UMiraiAmmoDefinition>> AmmoSubTypes;
+    TSet<TSoftObjectPtr<UMiraiAmmoDefinition>> AmmoSubTypes;
 
     /* ================== Stats ================== */
 

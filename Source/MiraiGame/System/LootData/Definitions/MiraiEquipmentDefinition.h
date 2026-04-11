@@ -73,7 +73,7 @@ public:
 
 	//Skeletal mesh of the Equipment
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment|Visual")
-    TSoftObjectPtr<USkeletalMesh> SkeletalMesh;
+    TObjectPtr<USkeletalMesh> SkeletalMesh;
 
     /* ================== Stats ================== */
 

@@ -1,22 +1,20 @@
-// Copyright(c) 2025, dvolkov.All rights reserved.
+// Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "MiraiSettingsLocal.h"
 #include "Engine/Engine.h"
-#include "EnhancedActionKeyMapping.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Engine/World.h"
 #include "Misc/App.h"
 #include "CommonInputSubsystem.h"
 #include "GenericPlatform/GenericPlatformFramePacer.h"
 #include "Player/MiraiLocalPlayer.h"
+#include "Performance/LatencyMarkerModule.h"
 #include "Performance/MiraiPerformanceStatTypes.h"
-#include "PlayerMappableInputConfig.h"
-#include "EnhancedInputSubsystems.h"
 #include "ICommonUIModule.h"
 #include "CommonUISettings.h"
 #include "SoundControlBusMix.h"
 #include "Widgets/Layout/SSafeZone.h"
-//#include "Performance/MiraiPerformanceSettings.h"
+#include "Performance/MiraiPerformanceSettings.h"
 #include "DeviceProfiles/DeviceProfileManager.h"
 #include "DeviceProfiles/DeviceProfile.h"
 #include "HAL/PlatformFramePacer.h"
@@ -25,11 +23,16 @@
 #include "AudioModulationStatics.h"
 //#include "Audio/MiraiAudioSettings.h"
 //#include "Audio/MiraiAudioMixEffectsSubsystem.h"
-#include "EnhancedActionKeyMapping.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MiraiSettingsLocal)
 
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Platform_Trait_BinauralSettingControlledByOS, "Platform.Trait.BinauralSettingControlledByOS");
+
+namespace PerfStatTags
+{
+	UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Platform_Trait_SupportsLatencyStats, "Platform.Trait.SupportsLatencyStats");
+	UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Platform_Trait_SupportsLatencyMarkers, "Platform.Trait.SupportsLatencyMarkers");
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -170,7 +173,7 @@ public:
 	T GetLowestValue(T DefaultIfNoPairs)
 	{
 		UpdateCache();
-		
+
 		T Result = DefaultIfNoPairs;
 		bool bFirstValue = true;
 		for (const FLimitPair& Pair : Thresholds)
@@ -185,7 +188,7 @@ public:
 				Result = FMath::Min(Result, Pair.Value);
 			}
 		}
-		
+
 		return Result;
 	}
 
@@ -218,7 +221,7 @@ private:
 				}
 				else
 				{
-				
+
 					UE_LOG(LogConsoleResponse, Error, TEXT("Malformed value for '%s'='%s', expecting a ':'"),
 						*IConsoleManager::Get().FindConsoleObjectName(WatchedVar.AsVariable()),
 						*LastSeenCVarString);
@@ -245,7 +248,7 @@ namespace MiraiSettingsHelpers
 	{
 		static_assert(sizeof(Scalability::FQualityLevels) == 88, "This function may need to be updated to account for new members");
 
-		int32 MaxScalability =						ScalabilityQuality.ViewDistanceQuality;
+		int32 MaxScalability = ScalabilityQuality.ViewDistanceQuality;
 		MaxScalability = FMath::Max(MaxScalability, ScalabilityQuality.AntiAliasingQuality);
 		MaxScalability = FMath::Max(MaxScalability, ScalabilityQuality.ShadowQuality);
 		MaxScalability = FMath::Max(MaxScalability, ScalabilityQuality.GlobalIlluminationQuality);
@@ -299,26 +302,26 @@ namespace MiraiSettingsHelpers
 		return ResolutionQualityRecommendations.Query(FrameRate);
 	}
 
-	//int32 ConstrainFrameRateToBeCompatibleWithOverallQuality(int32 FrameRate, int32 OverallQuality)
-	//{
-	//	//const UMiraiPlatformSpecificRenderingSettings* PlatformSettings = UMiraiPlatformSpecificRenderingSettings::Get();
-	//	//const TArray<int32>& PossibleRates = PlatformSettings->MobileFrameRateLimits;
+	int32 ConstrainFrameRateToBeCompatibleWithOverallQuality(int32 FrameRate, int32 OverallQuality)
+	{
+		const UMiraiPlatformSpecificRenderingSettings* PlatformSettings = UMiraiPlatformSpecificRenderingSettings::Get();
+		const TArray<int32>& PossibleRates = PlatformSettings->MobileFrameRateLimits;
 
-	//	// Choose the closest frame rate (without going over) to the user preferred one that is supported and compatible with the desired overall quality
-	//	int32 LimitIndex = PossibleRates.FindLastByPredicate([=](const int32& TestRate)
-	//	{
-	//		const bool bAtOrBelowDesiredRate = (TestRate <= FrameRate);
+		// Choose the closest frame rate (without going over) to the user preferred one that is supported and compatible with the desired overall quality
+		int32 LimitIndex = PossibleRates.FindLastByPredicate([=](const int32& TestRate)
+			{
+				const bool bAtOrBelowDesiredRate = (TestRate <= FrameRate);
 
-	//		const int32 LimitQuality = GetApplicableResolutionQualityLimit(TestRate);
-	//		const bool bQualityDoesntExceedLimit = (LimitQuality < 0) || (OverallQuality <= LimitQuality);
-	//		
-	//		const bool bIsSupported = UMiraiSettingsLocal::IsSupportedMobileFramePace(TestRate);
+				const int32 LimitQuality = GetApplicableResolutionQualityLimit(TestRate);
+				const bool bQualityDoesntExceedLimit = (LimitQuality < 0) || (OverallQuality <= LimitQuality);
 
-	//		return bAtOrBelowDesiredRate && bQualityDoesntExceedLimit && bIsSupported;
-	//	});
+				const bool bIsSupported = UMiraiSettingsLocal::IsSupportedMobileFramePace(TestRate);
 
-	//	return PossibleRates.IsValidIndex(LimitIndex) ? PossibleRates[LimitIndex] : UMiraiSettingsLocal::GetDefaultMobileFrameRate();
-	//}
+				return bAtOrBelowDesiredRate && bQualityDoesntExceedLimit && bIsSupported;
+			});
+
+		return PossibleRates.IsValidIndex(LimitIndex) ? PossibleRates[LimitIndex] : UMiraiSettingsLocal::GetDefaultMobileFrameRate();
+	}
 
 	// Returns the first frame rate at which overall quality is restricted/limited by the current device profile
 	int32 GetFirstFrameRateWithQualityLimit()
@@ -335,7 +338,6 @@ namespace MiraiSettingsHelpers
 
 //////////////////////////////////////////////////////////////////////
 
-PRAGMA_DISABLE_DEPRECATION_WARNINGS
 UMiraiSettingsLocal::UMiraiSettingsLocal()
 {
 	if (!HasAnyFlags(RF_ClassDefaultObject) && FSlateApplication::IsInitialized())
@@ -343,21 +345,23 @@ UMiraiSettingsLocal::UMiraiSettingsLocal()
 		OnApplicationActivationStateChangedHandle = FSlateApplication::Get().OnApplicationActivationStateChanged().AddUObject(this, &ThisClass::OnAppActivationStateChanged);
 	}
 
+	bEnableScalabilitySettings = UMiraiPlatformSpecificRenderingSettings::Get()->bSupportsGranularVideoQualitySettings;
+
 	SetToDefaults();
 }
-PRAGMA_ENABLE_DEPRECATION_WARNINGS
 
 void UMiraiSettingsLocal::SetToDefaults()
 {
 	Super::SetToDefaults();
 
 	bUseHeadphoneMode = false;
-	bUseHDRAudioMode = false;
+	//bUseHDRAudioMode = false;
 	bSoundControlBusMixLoaded = false;
+	bEnableLatencyTrackingStats = UMiraiSettingsLocal::DoesPlatformSupportLatencyTrackingStats();
 
-	//const UMiraiPlatformSpecificRenderingSettings* PlatformSettings = UMiraiPlatformSpecificRenderingSettings::Get();
-	//UserChosenDeviceProfileSuffix = PlatformSettings->DefaultDeviceProfileSuffix;
-	//DesiredUserChosenDeviceProfileSuffix = UserChosenDeviceProfileSuffix;
+	const UMiraiPlatformSpecificRenderingSettings* PlatformSettings = UMiraiPlatformSpecificRenderingSettings::Get();
+	UserChosenDeviceProfileSuffix = PlatformSettings->DefaultDeviceProfileSuffix;
+	DesiredUserChosenDeviceProfileSuffix = UserChosenDeviceProfileSuffix;
 
 	FrameRateLimit_InMenu = 144.0f;
 	FrameRateLimit_WhenBackgrounded = 30.0f;
@@ -372,16 +376,17 @@ void UMiraiSettingsLocal::LoadSettings(bool bForceReload)
 	Super::LoadSettings(bForceReload);
 
 	// Console platforms use rhi.SyncInterval to limit framerate
-	//const UMiraiPlatformSpecificRenderingSettings* PlatformSettings = UMiraiPlatformSpecificRenderingSettings::Get();
-	//if (PlatformSettings->FramePacingMode == EMiraiFramePacingMode::ConsoleStyle)
-	//{
-	//	FrameRateLimit = 0.0f;
-	//}
+	const UMiraiPlatformSpecificRenderingSettings* PlatformSettings = UMiraiPlatformSpecificRenderingSettings::Get();
+	if (PlatformSettings->FramePacingMode == EMiraiFramePacingMode::ConsoleStyle)
+	{
+		FrameRateLimit = 0.0f;
+	}
 
 	// Enable HRTF if needed
 	bDesiredHeadphoneMode = bUseHeadphoneMode;
 	SetHeadphoneModeEnabled(bUseHeadphoneMode);
 
+	ApplyLatencyTrackingStatSetting();
 
 	DesiredUserChosenDeviceProfileSuffix = UserChosenDeviceProfileSuffix;
 
@@ -390,7 +395,7 @@ void UMiraiSettingsLocal::LoadSettings(bool bForceReload)
 	DesiredMobileFrameRateLimit = MobileFrameRateLimit;
 	ClampMobileQuality();
 
-	
+
 	PerfStatSettingsChangedEvent.Broadcast();
 }
 
@@ -446,7 +451,7 @@ float CombineFrameRateLimits(float Limit1, float Limit2)
 
 float UMiraiSettingsLocal::GetEffectiveFrameRateLimit()
 {
-	//const UMiraiPlatformSpecificRenderingSettings* PlatformSettings = UMiraiPlatformSpecificRenderingSettings::Get();
+	const UMiraiPlatformSpecificRenderingSettings* PlatformSettings = UMiraiPlatformSpecificRenderingSettings::Get();
 
 #if WITH_EDITOR
 	if (GIsEditor && !CVarApplyFrameRateSettingsInPIE.GetValueOnGameThread())
@@ -455,10 +460,10 @@ float UMiraiSettingsLocal::GetEffectiveFrameRateLimit()
 	}
 #endif
 
-	//if (PlatformSettings->FramePacingMode == EMiraiFramePacingMode::ConsoleStyle)
-	//{
-	//	return 0.0f;
-	//}
+	if (PlatformSettings->FramePacingMode == EMiraiFramePacingMode::ConsoleStyle)
+	{
+		return 0.0f;
+	}
 
 	float EffectiveFrameRateLimit = Super::GetEffectiveFrameRateLimit();
 
@@ -467,20 +472,20 @@ float UMiraiSettingsLocal::GetEffectiveFrameRateLimit()
 		EffectiveFrameRateLimit = CombineFrameRateLimits(EffectiveFrameRateLimit, FrameRateLimit_InMenu);
 	}
 
-	//if (PlatformSettings->FramePacingMode == EMiraiFramePacingMode::DesktopStyle)
-	//{
-	//	if (FPlatformMisc::IsRunningOnBattery())
-	//	{
-	//		EffectiveFrameRateLimit = CombineFrameRateLimits(EffectiveFrameRateLimit, FrameRateLimit_OnBattery);
-	//	}
+	if (PlatformSettings->FramePacingMode == EMiraiFramePacingMode::DesktopStyle)
+	{
+		if (FPlatformMisc::IsRunningOnBattery())
+		{
+			EffectiveFrameRateLimit = CombineFrameRateLimits(EffectiveFrameRateLimit, FrameRateLimit_OnBattery);
+		}
 
-	//	if (FSlateApplication::IsInitialized() && !FSlateApplication::Get().IsActive())
-	//	{
-	//		EffectiveFrameRateLimit = CombineFrameRateLimits(EffectiveFrameRateLimit, FrameRateLimit_WhenBackgrounded);
-	//	}
-	//}
+		if (FSlateApplication::IsInitialized() && !FSlateApplication::Get().IsActive())
+		{
+			EffectiveFrameRateLimit = CombineFrameRateLimits(EffectiveFrameRateLimit, FrameRateLimit_WhenBackgrounded);
+		}
+	}
 
- 	return EffectiveFrameRateLimit;
+	return EffectiveFrameRateLimit;
 }
 
 int32 UMiraiSettingsLocal::GetHighestLevelOfAnyScalabilityChannel() const
@@ -580,6 +585,67 @@ void UMiraiSettingsLocal::SetPerfStatDisplayState(EMiraiDisplayablePerformanceSt
 		DisplayStatList.FindOrAdd(Stat) = DisplayMode;
 	}
 	PerfStatSettingsChangedEvent.Broadcast();
+}
+
+bool UMiraiSettingsLocal::DoesPlatformSupportLatencyMarkers()
+{
+	return ICommonUIModule::GetSettings().GetPlatformTraits().HasTag(PerfStatTags::TAG_Platform_Trait_SupportsLatencyMarkers);
+}
+
+void UMiraiSettingsLocal::SetEnableLatencyFlashIndicators(const bool bNewVal)
+{
+	if (bNewVal != bEnableLatencyFlashIndicators)
+	{
+		bEnableLatencyFlashIndicators = bNewVal;
+		LatencyFlashInidicatorSettingsChangedEvent.Broadcast();
+	}
+}
+
+void UMiraiSettingsLocal::SetEnableLatencyTrackingStats(const bool bNewVal)
+{
+	if (bNewVal != bEnableLatencyTrackingStats)
+	{
+		bEnableLatencyTrackingStats = bNewVal;
+
+		ApplyLatencyTrackingStatSetting();
+
+		LatencyStatIndicatorSettingsChangedEvent.Broadcast();
+	}
+}
+
+void UMiraiSettingsLocal::ApplyLatencyTrackingStatSetting()
+{
+	// Since this function will be called on load of the settings, we check if the slate app is initalized.
+	// If it isn't then we are not in a target which can even have latency stats (like a headless cooker) so we
+	// will exit early and do nothing.
+	if (!FSlateApplication::IsInitialized())
+	{
+		return;
+	}
+
+	// Don't bother doing anything if the platform doesn't even support tracking stats.
+	if (!DoesPlatformSupportLatencyTrackingStats())
+	{
+		return;
+	}
+
+	// Actually enable or disable the latency marker modules based on this setting
+	TArray<ILatencyMarkerModule*> LatencyMarkerModules = IModularFeatures::Get().GetModularFeatureImplementations<ILatencyMarkerModule>(ILatencyMarkerModule::GetModularFeatureName());
+	for (ILatencyMarkerModule* LatencyMarkerModule : LatencyMarkerModules)
+	{
+		LatencyMarkerModule->SetEnabled(bEnableLatencyTrackingStats);
+	}
+
+	UE_CLOG(!LatencyMarkerModules.IsEmpty(),
+		LogConsoleResponse,
+		Log,
+		TEXT("%s %d Latency Marker Module(s)"),
+		bEnableLatencyTrackingStats ? TEXT("Enabled") : TEXT("Disabled"), LatencyMarkerModules.Num());
+}
+
+bool UMiraiSettingsLocal::DoesPlatformSupportLatencyTrackingStats()
+{
+	return ICommonUIModule::GetSettings().GetPlatformTraits().HasTag(PerfStatTags::TAG_Platform_Trait_SupportsLatencyStats);
 }
 
 float UMiraiSettingsLocal::GetDisplayGamma() const
@@ -689,7 +755,7 @@ void UMiraiSettingsLocal::ResetToMobileDeviceDefaults()
 	// Reset frame rate
 	DesiredMobileFrameRateLimit = GetDefaultMobileFrameRate();
 	MobileFrameRateLimit = DesiredMobileFrameRateLimit;
-	
+
 	// Reset scalability
 	Scalability::FQualityLevels DefaultLevels = Scalability::GetQualityLevels();
 	OverrideQualityLevelsToScalabilityMode(DeviceDefaultScalabilitySettings, DefaultLevels);
@@ -701,30 +767,30 @@ void UMiraiSettingsLocal::ResetToMobileDeviceDefaults()
 
 int32 UMiraiSettingsLocal::GetMaxSupportedOverallQualityLevel() const
 {
-	//const UMiraiPlatformSpecificRenderingSettings* PlatformSettings = UMiraiPlatformSpecificRenderingSettings::Get();
-	//if ((PlatformSettings->FramePacingMode == EMiraiFramePacingMode::MobileStyle) && DeviceDefaultScalabilitySettings.bHasOverrides)
-	//{
-	//	return MiraiSettingsHelpers::GetHighestLevelOfAnyScalabilityChannel(DeviceDefaultScalabilitySettings.Qualities);
-	//}
-	//else
-	//{
+	const UMiraiPlatformSpecificRenderingSettings* PlatformSettings = UMiraiPlatformSpecificRenderingSettings::Get();
+	if ((PlatformSettings->FramePacingMode == EMiraiFramePacingMode::MobileStyle) && DeviceDefaultScalabilitySettings.bHasOverrides)
+	{
+		return MiraiSettingsHelpers::GetHighestLevelOfAnyScalabilityChannel(DeviceDefaultScalabilitySettings.Qualities);
+	}
+	else
+	{
 		return 3;
-	//}
+	}
 }
 
 void UMiraiSettingsLocal::SetMobileFPSMode(int32 NewLimitFPS)
 {
-	//const UMiraiPlatformSpecificRenderingSettings* PlatformSettings = UMiraiPlatformSpecificRenderingSettings::Get();
-	//if (PlatformSettings->FramePacingMode == EMiraiFramePacingMode::MobileStyle)
-	//{
-	//	if (MobileFrameRateLimit != NewLimitFPS)
-	//	{
-	//		MobileFrameRateLimit = NewLimitFPS;
-	//		UpdateGameModeDeviceProfileAndFps();
-	//	}
+	const UMiraiPlatformSpecificRenderingSettings* PlatformSettings = UMiraiPlatformSpecificRenderingSettings::Get();
+	if (PlatformSettings->FramePacingMode == EMiraiFramePacingMode::MobileStyle)
+	{
+		if (MobileFrameRateLimit != NewLimitFPS)
+		{
+			MobileFrameRateLimit = NewLimitFPS;
+			UpdateGameModeDeviceProfileAndFps();
+		}
 
-	//	DesiredMobileFrameRateLimit = MobileFrameRateLimit;
-	//}
+		DesiredMobileFrameRateLimit = MobileFrameRateLimit;
+	}
 }
 
 void UMiraiSettingsLocal::SetDesiredMobileFrameRateLimit(int32 NewLimitFPS)
@@ -740,58 +806,58 @@ void UMiraiSettingsLocal::SetDesiredMobileFrameRateLimit(int32 NewLimitFPS)
 
 void UMiraiSettingsLocal::ClampMobileFPSQualityLevels(bool bWriteBack)
 {
-	//const UMiraiPlatformSpecificRenderingSettings* PlatformSettings = UMiraiPlatformSpecificRenderingSettings::Get();
-	//if (PlatformSettings->FramePacingMode == EMiraiFramePacingMode::MobileStyle)
-	//{
-	//	const int32 QualityLimit = MiraiSettingsHelpers::GetApplicableOverallQualityLimit(DesiredMobileFrameRateLimit);
-	//	const int32 CurrentQualityLevel = GetHighestLevelOfAnyScalabilityChannel();
-	//	if ((QualityLimit >= 0) && (CurrentQualityLevel > QualityLimit))
-	//	{
-	//		SetOverallScalabilityLevel(QualityLimit);
+	const UMiraiPlatformSpecificRenderingSettings* PlatformSettings = UMiraiPlatformSpecificRenderingSettings::Get();
+	if (PlatformSettings->FramePacingMode == EMiraiFramePacingMode::MobileStyle)
+	{
+		const int32 QualityLimit = MiraiSettingsHelpers::GetApplicableOverallQualityLimit(DesiredMobileFrameRateLimit);
+		const int32 CurrentQualityLevel = GetHighestLevelOfAnyScalabilityChannel();
+		if ((QualityLimit >= 0) && (CurrentQualityLevel > QualityLimit))
+		{
+			SetOverallScalabilityLevel(QualityLimit);
 
-	//		if (bWriteBack)
-	//		{
-	//			Scalability::SetQualityLevels(ScalabilityQuality);
-	//		}
-	//		UE_LOG(LogConsoleResponse, Log, TEXT("Mobile FPS clamped overall quality (%d -> %d)."), CurrentQualityLevel, QualityLimit);
-	//	}
-	//}
+			if (bWriteBack)
+			{
+				Scalability::SetQualityLevels(ScalabilityQuality);
+			}
+			UE_LOG(LogConsoleResponse, Log, TEXT("Mobile FPS clamped overall quality (%d -> %d)."), CurrentQualityLevel, QualityLimit);
+		}
+	}
 }
 
 void UMiraiSettingsLocal::ClampMobileQuality()
 {
-	//const UMiraiPlatformSpecificRenderingSettings* PlatformSettings = UMiraiPlatformSpecificRenderingSettings::Get();
-	//if (PlatformSettings->FramePacingMode == EMiraiFramePacingMode::MobileStyle)
-	//{
-	//	// Clamp the resultant settings to the device default, it's known viable maximum.
-	//	// This is a clamp rather than override to preserve allowed user settings
-	//	Scalability::FQualityLevels CurrentLevels = Scalability::GetQualityLevels();
+	const UMiraiPlatformSpecificRenderingSettings* PlatformSettings = UMiraiPlatformSpecificRenderingSettings::Get();
+	if (PlatformSettings->FramePacingMode == EMiraiFramePacingMode::MobileStyle)
+	{
+		// Clamp the resultant settings to the device default, it's known viable maximum.
+		// This is a clamp rather than override to preserve allowed user settings
+		Scalability::FQualityLevels CurrentLevels = Scalability::GetQualityLevels();
 
-	//	/** On mobile, disables the 3D Resolution clamp that reverts the setting set by the user on boot.*/
-	//	bool bMobileDisableResolutionReset = true;
-	//	if (bMobileDisableResolutionReset)
-	//	{
-	//		DeviceDefaultScalabilitySettings.Qualities.ResolutionQuality = CurrentLevels.ResolutionQuality;
-	//	}
+		/** On mobile, disables the 3D Resolution clamp that reverts the setting set by the user on boot.*/
+		bool bMobileDisableResolutionReset = true;
+		if (bMobileDisableResolutionReset)
+		{
+			DeviceDefaultScalabilitySettings.Qualities.ResolutionQuality = CurrentLevels.ResolutionQuality;
+		}
 
-	//	ClampQualityLevelsToDeviceProfile(DeviceDefaultScalabilitySettings.Qualities, /*inout*/ CurrentLevels);
-	//	Scalability::SetQualityLevels(CurrentLevels);
+		ClampQualityLevelsToDeviceProfile(DeviceDefaultScalabilitySettings.Qualities, /*inout*/ CurrentLevels);
+		Scalability::SetQualityLevels(CurrentLevels);
 
-	//	// Clamp quality levels if required at the current frame rate
-	//	ClampMobileFPSQualityLevels(/*bWriteBack=*/ true);
+		// Clamp quality levels if required at the current frame rate
+		ClampMobileFPSQualityLevels(/*bWriteBack=*/ true);
 
-	//	const int32 MaxMobileFrameRate = GetMaxMobileFrameRate();
-	//	const int32 DefaultMobileFrameRate = GetDefaultMobileFrameRate();
-	//	
-	//	ensureMsgf(DefaultMobileFrameRate <= MaxMobileFrameRate, TEXT("Default mobile frame rate (%d) is higher than the maximum mobile frame rate (%d)!"), DefaultMobileFrameRate, MaxMobileFrameRate);
+		const int32 MaxMobileFrameRate = GetMaxMobileFrameRate();
+		const int32 DefaultMobileFrameRate = GetDefaultMobileFrameRate();
 
-	//	// Choose the closest supported frame rate to the user desired setting without going over the device imposed limit
-	//	const TArray<int32>& PossibleRates = PlatformSettings->MobileFrameRateLimits;
-	//	const int32 LimitIndex = PossibleRates.FindLastByPredicate([this](const int32& TestRate) { return (TestRate <= DesiredMobileFrameRateLimit) && IsSupportedMobileFramePace(TestRate); });
-	//	const int32 ActualLimitFPS = PossibleRates.IsValidIndex(LimitIndex) ? PossibleRates[LimitIndex] : GetDefaultMobileFrameRate();
+		ensureMsgf(DefaultMobileFrameRate <= MaxMobileFrameRate, TEXT("Default mobile frame rate (%d) is higher than the maximum mobile frame rate (%d)!"), DefaultMobileFrameRate, MaxMobileFrameRate);
 
-	//	ClampMobileResolutionQuality(ActualLimitFPS);
-	//}
+		// Choose the closest supported frame rate to the user desired setting without going over the device imposed limit
+		const TArray<int32>& PossibleRates = PlatformSettings->MobileFrameRateLimits;
+		const int32 LimitIndex = PossibleRates.FindLastByPredicate([this](const int32& TestRate) { return (TestRate <= DesiredMobileFrameRateLimit) && IsSupportedMobileFramePace(TestRate); });
+		const int32 ActualLimitFPS = PossibleRates.IsValidIndex(LimitIndex) ? PossibleRates[LimitIndex] : GetDefaultMobileFrameRate();
+
+		ClampMobileResolutionQuality(ActualLimitFPS);
+	}
 }
 
 void UMiraiSettingsLocal::ClampMobileResolutionQuality(int32 TargetFPS)
@@ -873,7 +939,7 @@ bool UMiraiSettingsLocal::CanModifyHeadphoneModeEnabled() const
 
 	return bHRTFOptionAvailable && !bBinauralSettingControlledByOS;
 }
-
+#if 0
 bool UMiraiSettingsLocal::IsHDRAudioModeEnabled() const
 {
 	return bUseHDRAudioMode;
@@ -887,19 +953,18 @@ void UMiraiSettingsLocal::SetHDRAudioModeEnabled(bool bEnabled)
 	{
 		if (const UWorld* World = GEngine->GetCurrentPlayWorld())
 		{
-			//if (UMiraiAudioMixEffectsSubsystem* MiraiAudioMixEffectsSubsystem = World->GetSubsystem<UMiraiAudioMixEffectsSubsystem>())
-			//{
-			//	MiraiAudioMixEffectsSubsystem->ApplyDynamicRangeEffectsChains(bEnabled);
-			//}
+			if (UMiraiAudioMixEffectsSubsystem* MiraiAudioMixEffectsSubsystem = World->GetSubsystem<UMiraiAudioMixEffectsSubsystem>())
+			{
+				MiraiAudioMixEffectsSubsystem->ApplyDynamicRangeEffectsChains(bEnabled);
+			}
 		}
 	}
 }
-
+#endif
 bool UMiraiSettingsLocal::CanRunAutoBenchmark() const
 {
-	//const UMiraiPlatformSpecificRenderingSettings* PlatformSettings = UMiraiPlatformSpecificRenderingSettings::Get();
-	//return PlatformSettings->bSupportsAutomaticVideoQualityBenchmark;
-	return false;
+	const UMiraiPlatformSpecificRenderingSettings* PlatformSettings = UMiraiPlatformSpecificRenderingSettings::Get();
+	return PlatformSettings->bSupportsAutomaticVideoQualityBenchmark;
 }
 
 bool UMiraiSettingsLocal::ShouldRunAutoBenchmarkAtStartup() const
@@ -921,9 +986,10 @@ bool UMiraiSettingsLocal::ShouldRunAutoBenchmarkAtStartup() const
 void UMiraiSettingsLocal::RunAutoBenchmark(bool bSaveImmediately)
 {
 	RunHardwareBenchmark();
-	
+
 	// Always apply, optionally save
 	ApplyScalabilitySettings();
+	ApplyLatencyTrackingStatSetting();
 
 	if (bSaveImmediately)
 	{
@@ -935,7 +1001,7 @@ void UMiraiSettingsLocal::ApplyScalabilitySettings()
 {
 	Scalability::SetQualityLevels(ScalabilityQuality);
 }
-
+#if 0
 float UMiraiSettingsLocal::GetOverallVolume() const
 {
 	return OverallVolume;
@@ -1102,24 +1168,24 @@ void UMiraiSettingsLocal::SetVolumeForControlBus(USoundControlBus* InSoundContro
 	// apply the settings to the cached User Control Bus Mix
 	if (GEngine && InSoundControlBus && bSoundControlBusMixLoaded)
 	{
-			if (const UWorld* AudioWorld = GEngine->GetCurrentPlayWorld())
-			{
-				ensureMsgf(ControlBusMix, TEXT("Control Bus Mix failed to load."));
+		if (const UWorld* AudioWorld = GEngine->GetCurrentPlayWorld())
+		{
+			ensureMsgf(ControlBusMix, TEXT("Control Bus Mix failed to load."));
 
-				// Create and set the Control Bus Mix Stage Parameters
-				FSoundControlBusMixStage UpdatedControlBusMixStage;
-				UpdatedControlBusMixStage.Bus = InSoundControlBus;
-				UpdatedControlBusMixStage.Value.TargetValue = InVolume;
-				UpdatedControlBusMixStage.Value.AttackTime = 0.01f;
-				UpdatedControlBusMixStage.Value.ReleaseTime = 0.01f;
+			// Create and set the Control Bus Mix Stage Parameters
+			FSoundControlBusMixStage UpdatedControlBusMixStage;
+			UpdatedControlBusMixStage.Bus = InSoundControlBus;
+			UpdatedControlBusMixStage.Value.TargetValue = InVolume;
+			UpdatedControlBusMixStage.Value.AttackTime = 0.01f;
+			UpdatedControlBusMixStage.Value.ReleaseTime = 0.01f;
 
-				// Add the Control Bus Mix Stage to an Array as the UpdateMix function requires
-				TArray<FSoundControlBusMixStage> UpdatedMixStageArray;
-				UpdatedMixStageArray.Add(UpdatedControlBusMixStage);
+			// Add the Control Bus Mix Stage to an Array as the UpdateMix function requires
+			TArray<FSoundControlBusMixStage> UpdatedMixStageArray;
+			UpdatedMixStageArray.Add(UpdatedControlBusMixStage);
 
-				// Modify the matching bus Mix Stage parameters on the User Control Bus Mix
-				UAudioModulationStatics::UpdateMix(AudioWorld, ControlBusMix, UpdatedMixStageArray);
-			}
+			// Modify the matching bus Mix Stage parameters on the User Control Bus Mix
+			UAudioModulationStatics::UpdateMix(AudioWorld, ControlBusMix, UpdatedMixStageArray);
+		}
 	}
 }
 
@@ -1128,6 +1194,7 @@ void UMiraiSettingsLocal::SetAudioOutputDeviceId(const FString& InAudioOutputDev
 	AudioOutputDeviceId = InAudioOutputDeviceId;
 	OnAudioOutputDeviceChanged.Broadcast(InAudioOutputDeviceId);
 }
+#endif
 
 void UMiraiSettingsLocal::ApplySafeZoneScale()
 {
@@ -1138,6 +1205,7 @@ void UMiraiSettingsLocal::ApplyNonResolutionSettings()
 {
 	Super::ApplyNonResolutionSettings();
 
+/*
 	// Check if Control Bus Mix references have been loaded,
 	// Might be false if applying non resolution settings without touching any of the setters from UI
 	if (!bSoundControlBusMixLoaded)
@@ -1187,7 +1255,7 @@ void UMiraiSettingsLocal::ApplyNonResolutionSettings()
 			}
 		}
 	}
-
+*/
 	if (UCommonInputSubsystem* InputSubsystem = UCommonInputSubsystem::Get(GetTypedOuter<ULocalPlayer>()))
 	{
 		InputSubsystem->SetGamepadInputType(ControllerPlatform);
@@ -1197,7 +1265,7 @@ void UMiraiSettingsLocal::ApplyNonResolutionSettings()
 	{
 		SetHeadphoneModeEnabled(bDesiredHeadphoneMode);
 	}
-	
+
 	if (DesiredUserChosenDeviceProfileSuffix != UserChosenDeviceProfileSuffix)
 	{
 		UserChosenDeviceProfileSuffix = DesiredUserChosenDeviceProfileSuffix;
@@ -1217,11 +1285,11 @@ int32 UMiraiSettingsLocal::GetOverallScalabilityLevel() const
 {
 	int32 Result = Super::GetOverallScalabilityLevel();
 
-	//const UMiraiPlatformSpecificRenderingSettings* PlatformSettings = UMiraiPlatformSpecificRenderingSettings::Get();
-	//if (PlatformSettings->FramePacingMode == EMiraiFramePacingMode::MobileStyle)
-	//{
-	//	Result = GetHighestLevelOfAnyScalabilityChannel();
-	//}
+	const UMiraiPlatformSpecificRenderingSettings* PlatformSettings = UMiraiPlatformSpecificRenderingSettings::Get();
+	if (PlatformSettings->FramePacingMode == EMiraiFramePacingMode::MobileStyle)
+	{
+		Result = GetHighestLevelOfAnyScalabilityChannel();
+	}
 
 	return Result;
 }
@@ -1236,19 +1304,19 @@ void UMiraiSettingsLocal::SetOverallScalabilityLevel(int32 Value)
 
 	Super::SetOverallScalabilityLevel(Value);
 
-	//const UMiraiPlatformSpecificRenderingSettings* PlatformSettings = UMiraiPlatformSpecificRenderingSettings::Get();
-	//if (PlatformSettings->FramePacingMode == EMiraiFramePacingMode::MobileStyle)
-	//{
-	//	// Restore the resolution quality, mobile decouples this from overall quality
-	//	ScalabilityQuality.ResolutionQuality = CurrentMobileResolutionQuality;
+	const UMiraiPlatformSpecificRenderingSettings* PlatformSettings = UMiraiPlatformSpecificRenderingSettings::Get();
+	if (PlatformSettings->FramePacingMode == EMiraiFramePacingMode::MobileStyle)
+	{
+		// Restore the resolution quality, mobile decouples this from overall quality
+		ScalabilityQuality.ResolutionQuality = CurrentMobileResolutionQuality;
 
-	//	// Changing the overall quality can end up adjusting the frame rate on mobile since there are limits
-	//	const int32 ConstrainedFrameRateLimit = MiraiSettingsHelpers::ConstrainFrameRateToBeCompatibleWithOverallQuality(DesiredMobileFrameRateLimit, Value);
-	//	if (ConstrainedFrameRateLimit != DesiredMobileFrameRateLimit)
-	//	{
-	//		SetDesiredMobileFrameRateLimit(ConstrainedFrameRateLimit);
-	//	}
-	//}
+		// Changing the overall quality can end up adjusting the frame rate on mobile since there are limits
+		const int32 ConstrainedFrameRateLimit = MiraiSettingsHelpers::ConstrainFrameRateToBeCompatibleWithOverallQuality(DesiredMobileFrameRateLimit, Value);
+		if (ConstrainedFrameRateLimit != DesiredMobileFrameRateLimit)
+		{
+			SetDesiredMobileFrameRateLimit(ConstrainedFrameRateLimit);
+		}
+	}
 }
 
 void UMiraiSettingsLocal::SetControllerPlatform(const FName InControllerPlatform)
@@ -1270,175 +1338,14 @@ FName UMiraiSettingsLocal::GetControllerPlatform() const
 	return ControllerPlatform;
 }
 
-PRAGMA_DISABLE_DEPRECATION_WARNINGS
-
-void UMiraiSettingsLocal::RegisterInputConfig(ECommonInputType Type, const UPlayerMappableInputConfig* NewConfig, const bool bIsActive)
-{
-	if (NewConfig)
-	{
-		const int32 ExistingConfigIdx = RegisteredInputConfigs.IndexOfByPredicate( [&NewConfig](const FLoadedMappableConfigPair& Pair) { return Pair.Config == NewConfig; } );
-		if (ExistingConfigIdx == INDEX_NONE)
-		{
-			const int32 NumAdded = RegisteredInputConfigs.Add(FLoadedMappableConfigPair(NewConfig, Type, bIsActive));
-			if (NumAdded != INDEX_NONE)
-			{
-				OnInputConfigRegistered.Broadcast(RegisteredInputConfigs[NumAdded]);
-			}	
-		}
-	}
-}
-
-int32 UMiraiSettingsLocal::UnregisterInputConfig(const UPlayerMappableInputConfig* ConfigToRemove)
-{
-	if (ConfigToRemove)
-	{
-		const int32 Index = RegisteredInputConfigs.IndexOfByPredicate( [&ConfigToRemove](const FLoadedMappableConfigPair& Pair) { return Pair.Config == ConfigToRemove; } );
-		if (Index != INDEX_NONE)
-		{
-			RegisteredInputConfigs.RemoveAt(Index);
-			return 1;
-		}
-			
-	}
-	return INDEX_NONE;
-}
-
-const UPlayerMappableInputConfig* UMiraiSettingsLocal::GetInputConfigByName(FName ConfigName) const
-{
-	for (const FLoadedMappableConfigPair& Pair : RegisteredInputConfigs)
-	{
-		if (Pair.Config->GetConfigName() == ConfigName)
-		{
-			return Pair.Config;
-		}
-	}
-	return nullptr;
-}
-
-void UMiraiSettingsLocal::GetRegisteredInputConfigsOfType(ECommonInputType Type, TArray<FLoadedMappableConfigPair>& OutArray) const
-{
-	OutArray.Empty();
-
-	// If "Count" is passed in then 
-	if (Type == ECommonInputType::Count)
-	{
-		OutArray = RegisteredInputConfigs;
-		return;
-	}
-	
-	for (const FLoadedMappableConfigPair& Pair : RegisteredInputConfigs)
-	{
-		if (Pair.Type == Type)
-		{
-			OutArray.Emplace(Pair);
-		}
-	}
-}
-
-void UMiraiSettingsLocal::GetAllMappingNamesFromKey(const FKey InKey, TArray<FName>& OutActionNames)
-{
-	if (InKey == EKeys::Invalid)
-	{
-		return;
-	}
-
-	// adding any names of actions that are bound to that key
-	for (const FLoadedMappableConfigPair& Pair : RegisteredInputConfigs)
-	{
-		if (Pair.Type == ECommonInputType::MouseAndKeyboard)
-		{
-			for (const FEnhancedActionKeyMapping& Mapping : Pair.Config->GetPlayerMappableKeys())
-			{
-				FName MappingName(Mapping.GetDisplayName().ToString());
-				FName ActionName = Mapping.GetMappingName();
-				// make sure it isn't custom bound as well
-				if (const FKey* MappingKey = CustomKeyboardConfig.Find(ActionName))
-				{
-					if (*MappingKey == InKey)
-					{
-						OutActionNames.Add(MappingName);
-					}
-				}
-				else
-				{
-					if (Mapping.Key == InKey)
-					{
-						OutActionNames.Add(MappingName);
-					}
-				}
-			}
-		}
-	}
-}
-
-void UMiraiSettingsLocal::AddOrUpdateCustomKeyboardBindings(const FName MappingName, const FKey NewKey, UMiraiLocalPlayer* LocalPlayer)
-{
-	if (MappingName == NAME_None)
-	{
-		return;
-	}
-	
-	if (InputConfigName != TEXT("Custom"))
-	{
-		// Copy Presets.
-		if (const UPlayerMappableInputConfig* DefaultConfig = GetInputConfigByName(TEXT("Default")))
-		{
-			for (const FEnhancedActionKeyMapping& Mapping : DefaultConfig->GetPlayerMappableKeys())
-			{
-				// Make sure that the mapping has a valid name, its possible to have an empty name
-				// if someone has marked a mapping as "Player Mappable" but deleted the default field value
-				if (Mapping.GetMappingName() != NAME_None)
-				{
-					CustomKeyboardConfig.Add(Mapping.GetMappingName(), Mapping.Key);
-				}
-			}
-		}
-		
-		InputConfigName = TEXT("Custom");
-	} 
-
-	if (FKey* ExistingMapping = CustomKeyboardConfig.Find(MappingName))
-	{
-		// Change the key to the new one
-		CustomKeyboardConfig[MappingName] = NewKey;
-	}
-	else
-	{
-		CustomKeyboardConfig.Add(MappingName, NewKey);
-	}
-
-	// Tell the enhanced input subsystem for this local player that we should remap some input! Woo
-	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer))
-	{
-		Subsystem->AddPlayerMappedKeyInSlot(MappingName, NewKey);
-	}
-}
-
-void UMiraiSettingsLocal::ResetKeybindingToDefault(const FName MappingName, UMiraiLocalPlayer* LocalPlayer)
-{
-	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer))
-	{
-		Subsystem->RemoveAllPlayerMappedKeysForMapping(MappingName);
-	}
-}
-
-void UMiraiSettingsLocal::ResetKeybindingsToDefault(UMiraiLocalPlayer* LocalPlayer)
-{
-	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer))
-	{
-		Subsystem->RemoveAllPlayerMappedKeys();
-	}
-}
-
-PRAGMA_ENABLE_DEPRECATION_WARNINGS
-
 void UMiraiSettingsLocal::LoadUserControlBusMix()
 {
+#if 0
 	if (GEngine)
 	{
 		if (const UWorld* World = GEngine->GetCurrentPlayWorld())
 		{
-			/*if (const UMiraiAudioSettings* MiraiAudioSettings = GetDefault<UMiraiAudioSettings>())
+			if (const UMiraiAudioSettings* MiraiAudioSettings = GetDefault<UMiraiAudioSettings>())
 			{
 				USoundControlBus* OverallControlBus = nullptr;
 				USoundControlBus* MusicControlBus = nullptr;
@@ -1541,9 +1448,10 @@ void UMiraiSettingsLocal::LoadUserControlBusMix()
 						ensureMsgf(SoundControlBusMix, TEXT("User Settings Control Bus Mix reference missing from Mirai Audio Settings."));
 					}
 				}
-			}*/
+			}
 		}
 	}
+#endif
 }
 
 void UMiraiSettingsLocal::OnAppActivationStateChanged(bool bIsActive)
@@ -1563,8 +1471,8 @@ void UMiraiSettingsLocal::UpdateGameModeDeviceProfileAndFps()
 
 	UDeviceProfileManager& Manager = UDeviceProfileManager::Get();
 
-	//const UMiraiPlatformSpecificRenderingSettings* PlatformSettings = UMiraiPlatformSpecificRenderingSettings::Get();
-	//const TArray<FMiraiQualityDeviceProfileVariant>& UserFacingVariants = PlatformSettings->UserFacingDeviceProfileOptions;
+	const UMiraiPlatformSpecificRenderingSettings* PlatformSettings = UMiraiPlatformSpecificRenderingSettings::Get();
+	const TArray<FMiraiQualityDeviceProfileVariant>& UserFacingVariants = PlatformSettings->UserFacingDeviceProfileOptions;
 
 	//@TODO: Might want to allow specific experiences to specify a suffix to attempt to use as well
 	// The code below will handle searching with this suffix (alone or in conjunction with the frame rate), but nothing sets it right now
@@ -1573,50 +1481,50 @@ void UMiraiSettingsLocal::UpdateGameModeDeviceProfileAndFps()
 	// Make sure the chosen setting is supported for the current display, walking down the list to try fallbacks
 	const int32 PlatformMaxRefreshRate = FPlatformMisc::GetMaxRefreshRate();
 
-	//int32 SuffixIndex = UserFacingVariants.IndexOfByPredicate([&](const FMiraiQualityDeviceProfileVariant& Data){ return Data.DeviceProfileSuffix == UserChosenDeviceProfileSuffix; });
-	//while (UserFacingVariants.IsValidIndex(SuffixIndex))
-	//{
-	//	if (PlatformMaxRefreshRate >= UserFacingVariants[SuffixIndex].MinRefreshRate)
-	//	{
-	//		break;
-	//	}
-	//	else
-	//	{
-	//		--SuffixIndex;
-	//	}
-	//}
+	int32 SuffixIndex = UserFacingVariants.IndexOfByPredicate([&](const FMiraiQualityDeviceProfileVariant& Data) { return Data.DeviceProfileSuffix == UserChosenDeviceProfileSuffix; });
+	while (UserFacingVariants.IsValidIndex(SuffixIndex))
+	{
+		if (PlatformMaxRefreshRate >= UserFacingVariants[SuffixIndex].MinRefreshRate)
+		{
+			break;
+		}
+		else
+		{
+			--SuffixIndex;
+		}
+	}
 
-	//const FString EffectiveUserSuffix = UserFacingVariants.IsValidIndex(SuffixIndex) ? UserFacingVariants[SuffixIndex].DeviceProfileSuffix : PlatformSettings->DefaultDeviceProfileSuffix;
+	const FString EffectiveUserSuffix = UserFacingVariants.IsValidIndex(SuffixIndex) ? UserFacingVariants[SuffixIndex].DeviceProfileSuffix : PlatformSettings->DefaultDeviceProfileSuffix;
 
 	// Build up a list of names to try
-	//const bool bHadUserSuffix = !EffectiveUserSuffix.IsEmpty();
+	const bool bHadUserSuffix = !EffectiveUserSuffix.IsEmpty();
 	const bool bHadExperienceSuffix = !ExperienceSuffix.IsEmpty();
 
 	FString BasePlatformName = UDeviceProfileManager::GetPlatformDeviceProfileName();
 	FName PlatformName; // Default unless in editor
-#if WITH_EDITOR
+#if 0
 	if (GIsEditor)
 	{
-		//const UMiraiPlatformEmulationSettings* Settings = GetDefault<UMiraiPlatformEmulationSettings>();
-		//const FName PretendBaseDeviceProfile = Settings->GetPretendBaseDeviceProfile();
-		//if (PretendBaseDeviceProfile != NAME_None)
-		//{
-		//	BasePlatformName = PretendBaseDeviceProfile.ToString();
-		//}
+		const UMiraiPlatformEmulationSettings* Settings = GetDefault<UMiraiPlatformEmulationSettings>();
+		const FName PretendBaseDeviceProfile = Settings->GetPretendBaseDeviceProfile();
+		if (PretendBaseDeviceProfile != NAME_None)
+		{
+			BasePlatformName = PretendBaseDeviceProfile.ToString();
+		}
 
-		//PlatformName = Settings->GetPretendPlatformName();
+		PlatformName = Settings->GetPretendPlatformName();
 	}
 #endif
 
 	TArray<FString> ComposedNamesToFind;
-	if (bHadExperienceSuffix /*&& bHadUserSuffix*/)
+	if (bHadExperienceSuffix && bHadUserSuffix)
 	{
-		ComposedNamesToFind.Add(BasePlatformName + TEXT("_") + ExperienceSuffix + TEXT("_")/* + EffectiveUserSuffix*/);
+		ComposedNamesToFind.Add(BasePlatformName + TEXT("_") + ExperienceSuffix + TEXT("_") + EffectiveUserSuffix);
 	}
-	//if (bHadUserSuffix)
-	//{
-	//	ComposedNamesToFind.Add(BasePlatformName + TEXT("_") + EffectiveUserSuffix);
-	//}
+	if (bHadUserSuffix)
+	{
+		ComposedNamesToFind.Add(BasePlatformName + TEXT("_") + EffectiveUserSuffix);
+	}
 	if (bHadExperienceSuffix)
 	{
 		ComposedNamesToFind.Add(BasePlatformName + TEXT("_") + ExperienceSuffix);
@@ -1644,8 +1552,8 @@ void UMiraiSettingsLocal::UpdateGameModeDeviceProfileAndFps()
 		}
 	}
 
-	//UE_LOG(LogConsoleResponse, Log, TEXT("UpdateGameModeDeviceProfileAndFps MaxRefreshRate=%d, ExperienceSuffix='%s', UserPicked='%s'->'%s', PlatformBase='%s', AppliedActual='%s'"), 
-	//	PlatformMaxRefreshRate, *ExperienceSuffix, *UserChosenDeviceProfileSuffix, *EffectiveUserSuffix, *BasePlatformName, *ActualProfileToApply);
+	UE_LOG(LogConsoleResponse, Log, TEXT("UpdateGameModeDeviceProfileAndFps MaxRefreshRate=%d, ExperienceSuffix='%s', UserPicked='%s'->'%s', PlatformBase='%s', AppliedActual='%s'"),
+		PlatformMaxRefreshRate, *ExperienceSuffix, *UserChosenDeviceProfileSuffix, *EffectiveUserSuffix, *BasePlatformName, *ActualProfileToApply);
 
 	// Apply the device profile if it's different to what we currently have
 	if (ActualProfileToApply != CurrentAppliedDeviceProfileOverrideSuffix)
@@ -1685,6 +1593,13 @@ void UMiraiSettingsLocal::UpdateGameModeDeviceProfileAndFps()
 					{
 						UE_LOG(LogConsoleResponse, Log, TEXT("Overriding device profile to %s"), *ActualProfileToApply);
 						Manager.SetOverrideDeviceProfile(NewDeviceProfile);
+
+						if (!bEnableScalabilitySettings)
+						{
+							// We don't support persistence of the scalability settings but at least we may
+							// provide up to date values if anybody queries them using the settings API.
+							ScalabilityQuality = Scalability::GetQualityLevels();
+						}
 					}
 				}
 			}
@@ -1692,18 +1607,18 @@ void UMiraiSettingsLocal::UpdateGameModeDeviceProfileAndFps()
 		CurrentAppliedDeviceProfileOverrideSuffix = ActualProfileToApply;
 	}
 
-	//switch (PlatformSettings->FramePacingMode)
-	//{
-	//case EMiraiFramePacingMode::MobileStyle:
-	//	UpdateMobileFramePacing();
-	//	break;
-	//case EMiraiFramePacingMode::ConsoleStyle:
-	//	UpdateConsoleFramePacing();
-	//	break;
-	//case EMiraiFramePacingMode::DesktopStyle:
-	//	UpdateDesktopFramePacing();
-	//	break;
-	//}
+	switch (PlatformSettings->FramePacingMode)
+	{
+	case EMiraiFramePacingMode::MobileStyle:
+		UpdateMobileFramePacing();
+		break;
+	case EMiraiFramePacingMode::ConsoleStyle:
+		UpdateConsoleFramePacing();
+		break;
+	case EMiraiFramePacingMode::DesktopStyle:
+		UpdateDesktopFramePacing();
+		break;
+	}
 }
 
 void UMiraiSettingsLocal::UpdateConsoleFramePacing()
@@ -1746,17 +1661,17 @@ void UMiraiSettingsLocal::UpdateMobileFramePacing()
 	//@TODO: Handle different limits for in-front-end or low-battery mode on mobile
 
 	// Choose the closest supported frame rate to the user desired setting without going over the device imposed limit
-	//const UMiraiPlatformSpecificRenderingSettings* PlatformSettings = UMiraiPlatformSpecificRenderingSettings::Get();
-	//const TArray<int32>& PossibleRates = PlatformSettings->MobileFrameRateLimits;
-	//const int32 LimitIndex = PossibleRates.FindLastByPredicate([this](const int32& TestRate) { return (TestRate <= MobileFrameRateLimit) && IsSupportedMobileFramePace(TestRate); });
-	//const int32 TargetFPS = PossibleRates.IsValidIndex(LimitIndex) ? PossibleRates[LimitIndex] : GetDefaultMobileFrameRate();
+	const UMiraiPlatformSpecificRenderingSettings* PlatformSettings = UMiraiPlatformSpecificRenderingSettings::Get();
+	const TArray<int32>& PossibleRates = PlatformSettings->MobileFrameRateLimits;
+	const int32 LimitIndex = PossibleRates.FindLastByPredicate([this](const int32& TestRate) { return (TestRate <= MobileFrameRateLimit) && IsSupportedMobileFramePace(TestRate); });
+	const int32 TargetFPS = PossibleRates.IsValidIndex(LimitIndex) ? PossibleRates[LimitIndex] : GetDefaultMobileFrameRate();
 
-	//UE_LOG(LogConsoleResponse, Log, TEXT("Setting frame pace to %d Hz."), TargetFPS);
-	//FPlatformRHIFramePacer::SetFramePace(TargetFPS);
+	UE_LOG(LogConsoleResponse, Log, TEXT("Setting frame pace to %d Hz."), TargetFPS);
+	FPlatformRHIFramePacer::SetFramePace(TargetFPS);
 
 	ClampMobileQuality();
 
-	//UpdateDynamicResFrameTime((float)TargetFPS);
+	UpdateDynamicResFrameTime((float)TargetFPS);
 }
 
 void UMiraiSettingsLocal::UpdateDynamicResFrameTime(float TargetFPS)
@@ -1771,4 +1686,3 @@ void UMiraiSettingsLocal::UpdateDynamicResFrameTime(float TargetFPS)
 		}
 	}
 }
-

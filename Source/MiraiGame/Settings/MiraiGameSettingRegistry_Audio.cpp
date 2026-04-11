@@ -42,9 +42,9 @@ UGameSettingCollection* UMiraiGameSettingRegistry::InitializeAudioSettings(UMira
 			Setting->SetDisplayName(LOCTEXT("OverallVolume_Name", "Overall"));
 			Setting->SetDescriptionRichText(LOCTEXT("OverallVolume_Description", "Adjusts the volume of everything."));
 
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetOverallVolume));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetOverallVolume));
-			Setting->SetDefaultValue(GetDefault<UMiraiSettingsLocal>()->GetOverallVolume());
+			//Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetOverallVolume));
+			//Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetOverallVolume));
+			//Setting->SetDefaultValue(GetDefault<UMiraiSettingsLocal>()->GetOverallVolume());
 			Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::ZeroToOnePercent);
 
 			Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
@@ -58,9 +58,9 @@ UGameSettingCollection* UMiraiGameSettingRegistry::InitializeAudioSettings(UMira
 			Setting->SetDisplayName(LOCTEXT("MusicVolume_Name", "Music"));
 			Setting->SetDescriptionRichText(LOCTEXT("MusicVolume_Description", "Adjusts the volume of music."));
 
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetMusicVolume));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetMusicVolume));
-			Setting->SetDefaultValue(GetDefault<UMiraiSettingsLocal>()->GetMusicVolume());
+			//Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetMusicVolume));
+			//Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetMusicVolume));
+			//Setting->SetDefaultValue(GetDefault<UMiraiSettingsLocal>()->GetMusicVolume());
 			Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::ZeroToOnePercent);
 
 			Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
@@ -74,9 +74,9 @@ UGameSettingCollection* UMiraiGameSettingRegistry::InitializeAudioSettings(UMira
 			Setting->SetDisplayName(LOCTEXT("SoundEffectsVolume_Name", "Sound Effects"));
 			Setting->SetDescriptionRichText(LOCTEXT("SoundEffectsVolume_Description", "Adjusts the volume of sound effects."));
 
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetSoundFXVolume));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetSoundFXVolume));
-			Setting->SetDefaultValue(GetDefault<UMiraiSettingsLocal>()->GetSoundFXVolume());
+			//Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetSoundFXVolume));
+			//Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetSoundFXVolume));
+			//Setting->SetDefaultValue(GetDefault<UMiraiSettingsLocal>()->GetSoundFXVolume());
 			Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::ZeroToOnePercent);
 
 			Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
@@ -90,9 +90,9 @@ UGameSettingCollection* UMiraiGameSettingRegistry::InitializeAudioSettings(UMira
 			Setting->SetDisplayName(LOCTEXT("DialogueVolume_Name", "Dialogue"));
 			Setting->SetDescriptionRichText(LOCTEXT("DialogueVolume_Description", "Adjusts the volume of dialogue for game characters and voice overs."));
 
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetDialogueVolume));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetDialogueVolume));
-			Setting->SetDefaultValue(GetDefault<UMiraiSettingsLocal>()->GetDialogueVolume());
+			//Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetDialogueVolume));
+			//Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetDialogueVolume));
+			//Setting->SetDefaultValue(GetDefault<UMiraiSettingsLocal>()->GetDialogueVolume());
 			Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::ZeroToOnePercent);
 
 			Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
@@ -106,9 +106,9 @@ UGameSettingCollection* UMiraiGameSettingRegistry::InitializeAudioSettings(UMira
 			Setting->SetDisplayName(LOCTEXT("VoiceChatVolume_Name", "Voice Chat"));
 			Setting->SetDescriptionRichText(LOCTEXT("VoiceChatVolume_Description", "Adjusts the volume of voice chat."));
 
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetVoiceChatVolume));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetVoiceChatVolume));
-			Setting->SetDefaultValue(GetDefault<UMiraiSettingsLocal>()->GetVoiceChatVolume());
+			//Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetVoiceChatVolume));
+			//Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetVoiceChatVolume));
+			//Setting->SetDefaultValue(GetDefault<UMiraiSettingsLocal>()->GetVoiceChatVolume());
 			Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::ZeroToOnePercent);
 
 			Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
@@ -235,8 +235,8 @@ UGameSettingCollection* UMiraiGameSettingRegistry::InitializeAudioSettings(UMira
 			Setting->SetDisplayName(LOCTEXT("AudioOutputDevice_Name", "Audio Output Device"));
 			Setting->SetDescriptionRichText(LOCTEXT("AudioOutputDevice_Description", "Changes the audio output device for game audio (not voice chat)."));
 
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetAudioOutputDeviceId));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetAudioOutputDeviceId));
+			//Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetAudioOutputDeviceId));
+			//Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetAudioOutputDeviceId));
 
 			Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
 			Setting->AddEditCondition(FWhenPlatformHasTrait::KillIfMissing(
@@ -299,9 +299,9 @@ UGameSettingCollection* UMiraiGameSettingRegistry::InitializeAudioSettings(UMira
 			Setting->SetDisplayName(LOCTEXT("HDRAudioMode_Name", "High Dynamic Range Audio"));
 			Setting->SetDescriptionRichText(LOCTEXT("HDRAudioMode_Description", "Enable high dynamic range audio. Changes the runtime processing chain to increase the dynamic range of the audio mixdown, appropriate for theater or more cinematic experiences."));
 
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(bUseHDRAudioMode));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetHDRAudioModeEnabled));
-			Setting->SetDefaultValue(GetDefault<UMiraiSettingsLocal>()->IsHDRAudioModeEnabled());
+			//Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(bUseHDRAudioMode));
+			//Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetHDRAudioModeEnabled));
+			//Setting->SetDefaultValue(GetDefault<UMiraiSettingsLocal>()->IsHDRAudioModeEnabled());
 
 			Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
 
