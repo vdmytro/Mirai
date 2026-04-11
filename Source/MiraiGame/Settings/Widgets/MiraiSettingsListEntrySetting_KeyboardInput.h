@@ -60,16 +60,4 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UKeyAlreadyBoundWarning> KeyAlreadyBoundWarningPanelClass;
 
-private:	// Bound Widgets
-	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, BlueprintProtected = true, AllowPrivateAccess = true))
-	TObjectPtr<UMiraiButtonBase> Button_PrimaryKey;
-
-	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, BlueprintProtected = true, AllowPrivateAccess = true))
-	TObjectPtr<UMiraiButtonBase> Button_SecondaryKey;
-
-	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, BlueprintProtected = true, AllowPrivateAccess = true))
-	TObjectPtr<UMiraiButtonBase> Button_Clear;
-
-	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, BlueprintProtected = true, AllowPrivateAccess = true))
-	TObjectPtr<UMiraiButtonBase> Button_ResetToDefault;
 };

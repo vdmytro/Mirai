@@ -3,7 +3,6 @@
 #include "MiraiHeroComponent.h"
 #include "Components/GameFrameworkComponentDelegates.h"
 #include "Logging/MessageLog.h"
-#include "Input/MiraiMappableConfigPair.h"
 #include "MiraiLogChannels.h"
 #include "EnhancedInputSubsystems.h"
 #include "Player/MiraiPlayerController.h"
@@ -179,7 +178,7 @@ void UMiraiHeroComponent::HandleChangeInitState(UGameFrameworkComponentManager* 
 		{
 			if (UMiraiCameraComponent* CameraComponent = UMiraiCameraComponent::FindCameraComponent(Pawn))
 			{
-				CameraComponent->DetermineCameraModeDelegate.BindUObject(this, &ThisClass::DetermineCameraMode);
+				CameraComponent->DetermineCameraModeDelegate.BindUObject(this, &UMiraiHeroComponent::DetermineCameraMode);
 			}
 		}
 	}
@@ -286,16 +285,16 @@ void UMiraiHeroComponent::InitializePlayerInput(UInputComponent* PlayerInputComp
 					// This is where we actually bind and input action to a gameplay tag, which means that Gameplay Ability Blueprints will
 					// be triggered directly by these input actions Triggered events. 
 					TArray<uint32> BindHandles;
-					MiraiIC->BindAbilityActions(InputConfig, this, &ThisClass::Input_AbilityInputTagPressed, &ThisClass::Input_AbilityInputTagReleased, /*out*/ BindHandles);
+					MiraiIC->BindAbilityActions(InputConfig, this, &UMiraiHeroComponent::Input_AbilityInputTagPressed, &UMiraiHeroComponent::Input_AbilityInputTagReleased, /*out*/ BindHandles);
 
-					MiraiIC->BindNativeAction(InputConfig, MiraiGameplayTags::InputTag_Move, ETriggerEvent::Triggered, this, &ThisClass::Input_Move, /*bLogIfNotFound=*/ true);
-					MiraiIC->BindNativeAction(InputConfig, MiraiGameplayTags::InputTag_Look_Mouse, ETriggerEvent::Triggered, this, &ThisClass::Input_LookMouse, /*bLogIfNotFound=*/ true);
-					MiraiIC->BindNativeAction(InputConfig, MiraiGameplayTags::InputTag_Look_Stick, ETriggerEvent::Triggered, this, &ThisClass::Input_LookStick, /*bLogIfNotFound=*/ true);
-					MiraiIC->BindNativeAction(InputConfig, MiraiGameplayTags::InputTag_Crouch, ETriggerEvent::Triggered, this, &ThisClass::Input_Crouch, /*bLogIfNotFound=*/ true);
-					MiraiIC->BindNativeAction(InputConfig, MiraiGameplayTags::InputTag_AutoRun, ETriggerEvent::Triggered, this, &ThisClass::Input_AutoRun, /*bLogIfNotFound=*/ true);
+					MiraiIC->BindNativeAction(InputConfig, MiraiGameplayTags::InputTag_Move, ETriggerEvent::Triggered, this, &UMiraiHeroComponent::Input_Move, /*bLogIfNotFound=*/ true);
+					MiraiIC->BindNativeAction(InputConfig, MiraiGameplayTags::InputTag_Look_Mouse, ETriggerEvent::Triggered, this, &UMiraiHeroComponent::Input_LookMouse, /*bLogIfNotFound=*/ true);
+					MiraiIC->BindNativeAction(InputConfig, MiraiGameplayTags::InputTag_Look_Stick, ETriggerEvent::Triggered, this, &UMiraiHeroComponent::Input_LookStick, /*bLogIfNotFound=*/ true);
+					MiraiIC->BindNativeAction(InputConfig, MiraiGameplayTags::InputTag_Crouch, ETriggerEvent::Triggered, this, &UMiraiHeroComponent::Input_Crouch, /*bLogIfNotFound=*/ true);
+					MiraiIC->BindNativeAction(InputConfig, MiraiGameplayTags::InputTag_AutoRun, ETriggerEvent::Triggered, this, &UMiraiHeroComponent::Input_AutoRun, /*bLogIfNotFound=*/ true);
 					// Uncomment only for test, this actions added up by ability
-					MiraiIC->BindNativeAction(InputConfig, MiraiGameplayTags::InputTag_Ability_Jump, ETriggerEvent::Triggered, this, &ThisClass::Input_Jump, /*bLogIfNotFound=*/ true);
-					MiraiIC->BindNativeAction(InputConfig, MiraiGameplayTags::InputTag_Ability_Sprint, ETriggerEvent::Ongoing, this, &ThisClass::Input_Sprint, /*bLogIfNotFound=*/ true);
+					MiraiIC->BindNativeAction(InputConfig, MiraiGameplayTags::InputTag_Ability_Jump, ETriggerEvent::Triggered, this, &UMiraiHeroComponent::Input_Jump, /*bLogIfNotFound=*/ true);
+					MiraiIC->BindNativeAction(InputConfig, MiraiGameplayTags::InputTag_Ability_Sprint, ETriggerEvent::Ongoing, this, &UMiraiHeroComponent::Input_Sprint, /*bLogIfNotFound=*/ true);
 				}
 			}
 		}
