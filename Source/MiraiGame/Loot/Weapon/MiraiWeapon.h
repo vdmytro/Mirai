@@ -1,20 +1,23 @@
-// Copyright (c) 2025, dvolkov. All rights reserved.
+// Copyright Epic Games, Inc. All Rights Reserved.
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Loot/MiraiLoot.h"
+#include "Net/Serialization/FastArraySerializer.h"
 
 #include "MiraiWeapon.generated.h"
 
 class UMiraiWeaponDefinition;
 class UMiraiAttachmentDefiniotion;
+struct FAttachmentSlotArray;
 
 USTRUCT(BlueprintType)
-struct FAttachmentSlot
+struct FAttachmentSlot : public FFastArraySerializerItem
 {
 	GENERATED_BODY()
 
+public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName SocketName; //Socket name that current node attached to
 
@@ -26,6 +29,26 @@ struct FAttachmentSlot
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	TObjectPtr<USkeletalMeshComponent> SkeletalMeshComponent = nullptr;
+
+	// Overriding PreReplicatedRemove and PostReplicatedAdd (optional)
+	void PreReplicatedRemove(const FAttachmentSlotArray& InArraySerializer) {}
+	void PostReplicatedAdd(const FAttachmentSlotArray& InArraySerializer) {}
+	void PostReplicatedChange(const FAttachmentSlotArray& InArraySerializer) {}
+};
+
+USTRUCT(BlueprintType)
+struct FAttachmentSlotArray : public FFastArraySerializer
+{
+    GENERATED_BODY()
+
+public:
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    TArray<FAttachmentSlot> AttachmentDataList;
+
+    bool NetDeltaSerialize(FNetDeltaSerializeInfo& DeltaParams)
+    {
+        return FFastArraySerializer::FastArrayDeltaSerialize<FAttachmentSlot, FAttachmentSlotArray>(AttachmentDataList, DeltaParams, *this);
+    }
 };
 
 UCLASS()
@@ -42,19 +65,26 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	virtual void OnConstruction(const FTransform& Transform) override;
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_RebuildMeshes();
+	void Server_RebuildMeshes_Implementation();
+	bool Server_RebuildMeshes_Validate();
+
 protected:
 	virtual void BeginPlay() override;
 
 	//Properties
 private:
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", Meta = (AllowPrivateAccess = "true"))
+	UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = "Data", Meta = (AllowPrivateAccess = "true"))
 	TSoftObjectPtr<UMiraiWeaponDefinition> DataAsset;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Data", Meta = (AllowPrivateAccess = "true"))
-	TArray<FAttachmentSlot> AttachmentDataList;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_DataArray, Category = "Data", Meta = (AllowPrivateAccess = "true"))
+	FAttachmentSlotArray DataArray;
 
-public:
-	virtual void OnConstruction(const FTransform& Transform) override;
+	UFUNCTION()
+	void OnRep_DataArray();
 
 };

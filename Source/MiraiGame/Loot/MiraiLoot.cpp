@@ -1,8 +1,7 @@
-// Copyright (c) 2025, dvolkov. All rights reserved.
+// Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "Loot/MiraiLoot.h"
 
-#include "Components/BoxComponent.h"
 
 
 AMiraiLoot::AMiraiLoot()
@@ -12,9 +11,6 @@ AMiraiLoot::AMiraiLoot()
 	PrimaryActorTick.bStartWithTickEnabled = false;
 
 	NetCullDistanceSquared = 900000000.0f;
-	UBoxComponent* BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("RootCollisionComponent"));
-	BoxComponent->SetSimulatePhysics(true);
-	RootComponent = BoxComponent;
 }
 
 
