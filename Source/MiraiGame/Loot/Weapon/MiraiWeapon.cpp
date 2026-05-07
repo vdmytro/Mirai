@@ -1,4 +1,4 @@
-// Copyright (c) 2025, dvolkov. All rights reserved.
+// Copyright Epic Games, Inc. All Rights Reserved.
 
 
 #include "Loot/Weapon/MiraiWeapon.h"
@@ -9,11 +9,13 @@
 #include "System/LootData/Definitions/MiraiWeaponDefinition.h"
 #include "System/LootData/Definitions/MiraiAttachmentDefiniotion.h"
 #include "PhysicsEngine/PhysicsAsset.h"
+#include "Net/UnrealNetwork.h"
 
 
 
 AMiraiWeapon::AMiraiWeapon()
 {
+    bReplicates = true;
 }
 
 
@@ -35,10 +37,22 @@ void AMiraiWeapon::OnConstruction(const FTransform& Transform)
 
 }
 
+bool AMiraiWeapon::Server_RebuildMeshes_Validate()
+{
+    // TODO: Validate asset list
+    return true;
+}
+
+void AMiraiWeapon::Server_RebuildMeshes_Implementation()
+{
+    RebuildMeshes();
+}
+
 void AMiraiWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
     
+    DOREPLIFETIME(AMiraiWeapon, DataArray);
 }
 
 void AMiraiWeapon::Tick(float DeltaTime)
@@ -54,7 +68,7 @@ void AMiraiWeapon::RebuildMeshes()
 
     UPhysicsAsset* RootPhysicsAsset;
 
-    for (FAttachmentSlot& AttachmentSlot : AttachmentDataList)
+    for (FAttachmentSlot& AttachmentSlot : DataArray.AttachmentDataList)
     {
         if (IsValid(AttachmentSlot.SkeletalMeshComponent))
         {
@@ -70,7 +84,7 @@ void AMiraiWeapon::RebuildMeshes()
         
         if (AttachmentSlot.Parentindex >= 0)
         { 
-            NewComponent->AttachToComponent(AttachmentDataList[AttachmentSlot.Parentindex].SkeletalMeshComponent, FAttachmentTransformRules::SnapToTargetIncludingScale, AttachmentSlot.SocketName);
+            NewComponent->AttachToComponent(DataArray.AttachmentDataList[AttachmentSlot.Parentindex].SkeletalMeshComponent, FAttachmentTransformRules::SnapToTargetIncludingScale, AttachmentSlot.SocketName);
             // TODO: Enable or disable bodies in root PA 
         }
         else
@@ -86,4 +100,9 @@ void AMiraiWeapon::RebuildMeshes()
        
         AttachmentSlot.SkeletalMeshComponent = NewComponent;
     }
+}
+
+void AMiraiWeapon::OnRep_DataArray()
+{
+
 }
