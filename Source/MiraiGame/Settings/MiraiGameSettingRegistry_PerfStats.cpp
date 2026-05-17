@@ -1,4 +1,4 @@
-// Copyright(c) 2025, dvolkov.All rights reserved.
+// Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "CustomSettings/MiraiSettingValueDiscrete_PerfStat.h"
 #include "EditCondition/WhenPlayingAsPrimaryPlayer.h"

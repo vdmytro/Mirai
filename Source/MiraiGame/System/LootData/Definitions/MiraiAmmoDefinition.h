@@ -48,10 +48,6 @@ class MIRAIGAME_API UMiraiAmmoDefinition : public UMiraiLootDefinition
 	
 public:
 
-	//SkeletalMesh
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ammo|Visual")
-    TObjectPtr<USkeletalMesh> SkeletalMesh;
-
 	//Bullet StaticMesh
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ammo|Visual")
     TObjectPtr<UStaticMesh> BulletMesh;

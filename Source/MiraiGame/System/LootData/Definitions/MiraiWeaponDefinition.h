@@ -6,7 +6,7 @@
 #include "System/LootData/Definitions/MiraiLootDefinition.h"
 #include "MiraiWeaponDefinition.generated.h"
 
-class UMiraiAttachmentDefiniotion;
+class UMiraiAttachmentDefinition;
 class UMiraiAmmoDefinition;
 class UNiagaraSystem;
 
@@ -19,8 +19,11 @@ struct FWeaponAttachmentSlot
     FName Socket;
 
     UPROPERTY()
-    TSoftObjectPtr<UMiraiAttachmentDefiniotion> Attachment;
+    TSoftObjectPtr<UMiraiAttachmentDefinition> Attachment;
+
 };
+
+uint32 GetTypeHash(const FWeaponAttachmentSlot& obj);
 
 /* ================================
  * Animation Set
@@ -90,14 +93,17 @@ class MIRAIGAME_API UMiraiWeaponDefinition : public UMiraiLootDefinition
 	
 public:
 	/* ================== Attachments ================== */
+    //Skeletal mesh of the attachment
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Attachments")
+    TObjectPtr<USkeletalMesh> BaseSkeletalMesh;
 
     // Default Base-Type Attachments (spawned by default)
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Attachments")
-    TSet<TSoftObjectPtr<UMiraiAttachmentDefiniotion>> DefaultBaseAttachments;
+    TSet<FWeaponAttachmentSlot> DefaultBaseAttachments;
 
     // All compatible Base-Type Attachments
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Attachments")
-    TSet<TSoftObjectPtr<UMiraiAttachmentDefiniotion>> CompatibleAttachments;
+    TSet<TSoftObjectPtr<UMiraiAttachmentDefinition>> CompatibleAttachments;
 
     /* ================== Weapon Params ================== */
 

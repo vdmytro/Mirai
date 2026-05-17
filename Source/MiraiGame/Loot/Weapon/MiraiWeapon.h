@@ -9,7 +9,7 @@
 #include "MiraiWeapon.generated.h"
 
 class UMiraiWeaponDefinition;
-class UMiraiAttachmentDefiniotion;
+class UMiraiAttachmentDefinition;
 struct FAttachmentSlotArray;
 
 USTRUCT(BlueprintType)
@@ -22,13 +22,10 @@ public:
 	FName SocketName; //Socket name that current node attached to
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSoftObjectPtr<UMiraiAttachmentDefiniotion> DataAsset = nullptr;
+	TSoftObjectPtr<UMiraiAttachmentDefinition> DataAsset = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int Parentindex = -1;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	TObjectPtr<USkeletalMeshComponent> SkeletalMeshComponent = nullptr;
+	//UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	//TObjectPtr<USkeletalMeshComponent> SkeletalMeshComponent = nullptr;
 
 	// Overriding PreReplicatedRemove and PostReplicatedAdd (optional)
 	void PreReplicatedRemove(const FAttachmentSlotArray& InArraySerializer) {}

@@ -17,6 +17,13 @@ class MIRAIGAME_API UMiraiLootDefinition : public UPrimaryDataAsset
 	GENERATED_BODY()
 	
 public:
+    //ID
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Loot", meta = (ClampMin = "0"))
+    int32 ID;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Visual")
+    TObjectPtr<UStaticMesh> Mesh;
+
     //Loot Type
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Loot")
     ELootType LootType;

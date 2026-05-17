@@ -1,4 +1,4 @@
-// Copyright(c) 2025, dvolkov.All rights reserved.
+// Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "Cosmetics/MiraiControllerComponent_CharacterParts.h"
 #include "Cosmetics/MiraiCharacterPartTypes.h"
