@@ -3,24 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "System/LootData/Definitions/MiraiLootDefinition.h"
+#include "Loot/LootData/Definitions/MiraiLootDefinition.h"
+#include "Loot/LootData/MiraiWeaponSlotData.h"
+
 #include "MiraiWeaponDefinition.generated.h"
 
-class UMiraiAttachmentDefiniotion;
 class UMiraiAmmoDefinition;
 class UNiagaraSystem;
-
-USTRUCT(BlueprintType)
-struct FWeaponAttachmentSlot
-{
-    GENERATED_BODY()
-
-    UPROPERTY()
-    FName Socket;
-
-    UPROPERTY()
-    TSoftObjectPtr<UMiraiAttachmentDefiniotion> Attachment;
-};
 
 /* ================================
  * Animation Set
@@ -89,15 +78,14 @@ class MIRAIGAME_API UMiraiWeaponDefinition : public UMiraiLootDefinition
 	GENERATED_BODY()
 	
 public:
-	/* ================== Attachments ================== */
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Visual")
+    TObjectPtr<USkeletalMesh> WeaponMesh;
+
+	/* ================== Slots ================== */
 
     // Default Base-Type Attachments (spawned by default)
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Attachments")
-    TSet<TSoftObjectPtr<UMiraiAttachmentDefiniotion>> DefaultBaseAttachments;
-
-    // All compatible Base-Type Attachments
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Attachments")
-    TSet<TSoftObjectPtr<UMiraiAttachmentDefiniotion>> CompatibleAttachments;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Slots")
+    TArray<FMiraiWeaponSlotData> Slots;
 
     /* ================== Weapon Params ================== */
 

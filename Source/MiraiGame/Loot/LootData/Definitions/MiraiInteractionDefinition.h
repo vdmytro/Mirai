@@ -3,7 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "System/LootData/Definitions/MiraiLootDefinition.h"
+#include "Loot/LootData/Definitions/MiraiLootDefinition.h"
+
 #include "MiraiInteractionDefinition.generated.h"
 
 /**

@@ -4,7 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
-#include "System/LootData/MiraiLootTypes.h"
+#include "GameplayTagContainer.h"
+#include "Loot/LootData/MiraiLootTypes.h"
 
 #include "MiraiLootDefinition.generated.h"
 
@@ -17,25 +18,29 @@ class MIRAIGAME_API UMiraiLootDefinition : public UPrimaryDataAsset
 	GENERATED_BODY()
 	
 public:
-    //Loot Type
+    // Loot Type
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Loot")
     ELootType LootType;
 
-    //Name
+    // Name
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
-    FText Name;
+    FText DisplayName;
 
-    //Description
+    // Description
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI", meta = (MultiLine = true))
     FText Description;
 
-    //Icon
+    // Icon
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
     TSoftObjectPtr<UTexture2D> Icon;
 
+    // Tags
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
+    FGameplayTagContainer Tags;
+
     //Weight
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Loot", meta = (ClampMin = "0"))
-    float Weight = 1.f;
+    float Weight = 0.f;
 
 
     virtual FPrimaryAssetId GetPrimaryAssetId() const override

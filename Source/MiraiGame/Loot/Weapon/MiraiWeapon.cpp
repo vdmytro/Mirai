@@ -6,8 +6,8 @@
 
 #include "Loot/Weapon/MiraiWeaponAttachment.h"
 #include "MiraiLogChannels.h"
-#include "System/LootData/Definitions/MiraiWeaponDefinition.h"
-#include "System/LootData/Definitions/MiraiAttachmentDefiniotion.h"
+#include "Loot/LootData/Definitions/MiraiWeaponDefinition.h"
+#include "Loot/LootData/Definitions/MiraiAttachmentDefiniotion.h"
 #include "PhysicsEngine/PhysicsAsset.h"
 #include "Net/UnrealNetwork.h"
 

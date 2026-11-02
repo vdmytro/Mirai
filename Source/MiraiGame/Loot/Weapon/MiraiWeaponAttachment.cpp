@@ -2,7 +2,7 @@
 
 
 #include "Loot/Weapon/MiraiWeaponAttachment.h"
-#include "System/LootData/Definitions/MiraiAttachmentDefiniotion.h"
+#include "Loot/LootData/Definitions/MiraiAttachmentDefiniotion.h"
 
 
 AMiraiWeaponAttachment::AMiraiWeaponAttachment()
@@ -38,13 +38,13 @@ void AMiraiWeaponAttachment::Tick(float DeltaTime)
 
 }
 
-FString AMiraiWeaponAttachment::GetName()
+FText AMiraiWeaponAttachment::GetName()
 {
 	if (DataAsset)
 	{
-		return DataAsset->Name.ToString();
+		return DataAsset->DisplayName;
 	}
 
-	return TEXT("");
+	return FText::FromString(TEXT(""));
 }
 
